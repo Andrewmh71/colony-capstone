@@ -36,6 +36,15 @@ class Ui_MainWindow(object):
         self.imageContainer = QGraphicsView(self.centralwidget)
         self.imageContainer.setObjectName(u"imageContainer")
         self.imageContainer.setGeometry(QRect(70, 60, 791, 471))
+        self.cropButton = QPushButton(self.centralwidget)
+        self.cropButton.setObjectName(u"cropButton")
+        self.cropButton.setGeometry(QRect(760, 0, 80, 24))
+        self.analyzeButton = QPushButton(self.centralwidget)
+        self.analyzeButton.setObjectName(u"analyzeButton")
+        self.analyzeButton.setGeometry(QRect(670, 0, 80, 24))
+        self.saveButton = QPushButton(self.centralwidget)
+        self.saveButton.setObjectName(u"saveButton")
+        self.saveButton.setGeometry(QRect(590, 0, 80, 24))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -57,6 +66,9 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.uploadButton.setText(QCoreApplication.translate("MainWindow", u"Upload Image", None))
+        self.cropButton.setText(QCoreApplication.translate("MainWindow", u"Crop", None))
+        self.analyzeButton.setText(QCoreApplication.translate("MainWindow", u"Analyze", None))
+        self.saveButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
     # retranslateUi
 
