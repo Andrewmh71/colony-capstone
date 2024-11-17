@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QMessageBox, QGraphicsEllipseItem, QGraphicsItem, QGraphicsRectItem
-from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent
+from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath
 from PySide6.QtCore import Qt, QRectF
 from ui_form import Ui_MainWindow
 from customGraphicsView import ImageGraphicsView
@@ -11,7 +11,7 @@ class ResizeHandle(QGraphicsRectItem):
     def __init__(self, parent=None, position=None):
         super().__init__(-5, -5, 10, 10, parent)
         self.setBrush(Qt.black)
-        self.setFlag(QGraphicsItem.ItemIsMovable, False)  # Do not allow direct moving
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)  # Allow direct moving
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
         self.setCursor(Qt.SizeFDiagCursor)
         self.position = position  # Position can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
@@ -20,7 +20,7 @@ class ResizeHandle(QGraphicsRectItem):
     def mousePressEvent(self, event: QMouseEvent):
         self.resizing = True
         self.setCursor(Qt.SizeFDiagCursor)
-        self.initial_pos = self.pos()
+        self.initial_pos = event.scenePos()
         self.initial_rect = self.parentItem().rect()
         super().mousePressEvent(event)
 
@@ -34,7 +34,7 @@ class ResizeHandle(QGraphicsRectItem):
             parent = self.parentItem()
             rect = parent.rect()
 
-            delta = event.pos() - self.initial_pos
+            delta = event.scenePos() - self.initial_pos
             if self.position == 'topLeft':
                 rect.setTopLeft(self.initial_rect.topLeft() + delta)
             elif self.position == 'topRight':
@@ -45,6 +45,7 @@ class ResizeHandle(QGraphicsRectItem):
                 rect.setBottomRight(self.initial_rect.bottomRight() + delta)
 
             # Apply the new rect to the ellipse
+            parent.prepareGeometryChange()
             parent.setRect(rect)
             parent.update_handles()
 
@@ -58,13 +59,13 @@ class EllipseItem(QGraphicsEllipseItem):
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         self.setPen(QPen(Qt.red, 2))
 
-        # Create resize handles
+
         self.handles = {
-            'topLeft': ResizeHandle(self, 'topLeft'),
-            'topRight': ResizeHandle(self, 'topRight'),
-            'bottomLeft': ResizeHandle(self, 'bottomLeft'),
-            'bottomRight': ResizeHandle(self, 'bottomRight')
-        }
+                    'topLeft': ResizeHandle(self, 'topLeft'),
+                    'topRight': ResizeHandle(self, 'topRight'),
+                    'bottomLeft': ResizeHandle(self, 'bottomLeft'),
+                    'bottomRight': ResizeHandle(self, 'bottomRight')
+                }
         self.update_handles()
 
     def update_handles(self):
@@ -168,77 +169,88 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Error", "Error converting image")
             return
 
-        # Apply Gaussian blur to reduce noise
+            # Apply Gaussian blur to reduce noise
         blurred = cv2.GaussianBlur(image, (11, 11), 0)
 
-        # Apply a binary threshold to the image
+            # Apply a binary threshold to the image
         _, thresholded = cv2.threshold(blurred, 100, 255, cv2.THRESH_BINARY_INV)
 
-        # Use morphological operations to enhance the image
+            # Use morphological operations to enhance the image
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         morphed = cv2.morphologyEx(thresholded, cv2.MORPH_CLOSE, kernel)
 
-        # Find contours in the thresholded image
+            # Create a mask to ignore black borders
+        mask = cv2.inRange(image, 1, 255)  # Mask where the image is not black
+
+            # Apply the mask to the morphed image
+        morphed = cv2.bitwise_and(morphed, morphed, mask=mask)
+
+            # Find contours in the thresholded image
         contours, _ = cv2.findContours(morphed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Filter contours by area to count smaller blobs
+            # Filter contours by area to count smaller blobs
         min_area = 10  # Minimum area of a contour to be considered a colony
         filtered_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_area]
 
-        # Draw contours on the original image
+            # Draw contours on the original image
         output = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         cv2.drawContours(output, filtered_contours, -1, (0, 255, 0), 2)
 
-        # Count the number of colonies
+            # Count the number of colonies
         colony_count = len(filtered_contours)
 
-        # Show the colony count in a message box
+            # Show the colony count in a message box
         QMessageBox.information(self, "Colony Count", f'Number of colonies: {colony_count}')
 
-        # Convert the processed image to QImage
+            # Convert the processed image to QImage
         height, width, channel = output.shape
         bytes_per_line = 3 * width
         q_image = QImage(output.data, width, height, bytes_per_line, QImage.Format_RGB888)
 
-        # Convert QImage to QPixmap and display it
+            # Convert QImage to QPixmap and display it
         pixmap = QPixmap.fromImage(q_image)
         self.display_image(pixmap)
 
     def capture_ellipse_area(self):
-        if self.image is None or self.ellipse_item is None:
+        if self.pixmap is None or self.ellipse_item is None:
             QMessageBox.information(self, "Error", "No image or ellipse defined")
             return None
 
-        # Get the ellipse's geometry
-        rect = self.ellipse_item.rect()
+            # Convert QPixmap to QImage
+        q_image = self.pixmap.toImage()
+
+            # Get the ellipse's geometry in scene coordinates
+        rect = self.ellipse_item.mapRectToScene(self.ellipse_item.rect())
         center = (int(rect.center().x()), int(rect.center().y()))
         radius_x = int(rect.width() / 2)
         radius_y = int(rect.height() / 2)
 
-        # Create an elliptical mask
-        mask = np.zeros_like(self.image)
-        cv2.ellipse(mask, center, (radius_x, radius_y), 0, 0, 360, 255, -1)
+            # Create an elliptical mask using QPainterPath
+        path = QPainterPath()
+        path.addEllipse(center[0] - radius_x, center[1] - radius_y, 2 * radius_x, 2 * radius_y)
 
-        # Apply the mask to the image
-        masked_image = cv2.bitwise_and(self.image, self.image, mask=mask)
+            # Apply the mask to the image
+        result = QImage(q_image.size(), QImage.Format_ARGB32)
+        result.fill(Qt.transparent)
 
-        return masked_image
+        painter = QPainter(result)
+        painter.setClipPath(path)
+        painter.drawImage(0, 0, q_image)
+        painter.end()
+
+        return result
 
     def save_cropped_image(self):
         cropped_image = self.capture_ellipse_area()
         if cropped_image is None:
             return
 
-        # Convert the cropped image to QImage
-        height, width = cropped_image.shape
-        bytes_per_line = width
-        q_image = QImage(cropped_image.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
-
         # Save the QImage to a file
         file_path, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "Images (*.png *.jpg *.jpeg *.bmp *.gif)")
         if file_path:
-            q_image.save(file_path)
+            cropped_image.save(file_path)
             QMessageBox.information(self, "Success", f"Image saved to {file_path}")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
