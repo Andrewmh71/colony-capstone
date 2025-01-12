@@ -1,0 +1,688 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  EXCEPTION_UNCAUGHT_CXX_EXCEPTION (0xe06d7363) at pc=0x00007ffd0746fb4c, pid=28364, tid=12048
+#
+# JRE version: OpenJDK Runtime Environment Temurin-11.0.25+9 (11.0.25+9) (build 11.0.25+9)
+# Java VM: OpenJDK 64-Bit Client VM Temurin-11.0.25+9 (11.0.25+9, mixed mode, serial gc, windows-amd64)
+# Problematic frame:
+# C  [KERNELBASE.dll+0x5fb4c]
+#
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+# If you would like to submit a bug report, please visit:
+#   https://github.com/adoptium/adoptium-support/issues
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED 
+
+Host: Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz, 8 cores, 31G,  Windows 11 , 64 bit Build 22621 (10.0.22621.4391)
+Time: Sun Jan 12 00:58:50 2025 Pacific Standard Time elapsed time: 264.066731 seconds (0d 0h 4m 24s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x000002a2b0a3e000):  JavaThread "main" [_thread_in_native, id=12048, stack(0x000000cc62400000,0x000000cc625f0000)]
+
+Stack: [0x000000cc62400000,0x000000cc625f0000],  sp=0x000000cc625eb560,  free space=1965k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [KERNELBASE.dll+0x5fb4c]
+C  [VCRUNTIME140_1.dll+0x27b3]
+C  [ntdll.dll+0xa4c96]
+C  [_jpype.cp39-win_amd64.pyd+0x3c6a5]
+C  [_jpype.cp39-win_amd64.pyd+0x3cf22]
+C  [_jpype.cp39-win_amd64.pyd+0x2be1b]
+C  0x000002a2bed0e39a
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  org.jpype.manager.TypeFactoryNative.newWrapper(JJ)V+0
+j  org.jpype.JPypeContext.newWrapper(J)V+16
+v  ~StubRoutines::call_stub
+
+siginfo: EXCEPTION_UNCAUGHT_CXX_EXCEPTION (0xe06d7363), ExceptionInformation=0x0000000019930520 0x000000cc625eda18 0x00007ffca0d790a0 0x00007ffca0d10000 
+
+
+Register to memory mapping:
+
+RIP=0x00007ffd0746fb4c KERNELBASE.dll
+RAX=0x000002a2d0f0edb0 is a pointer to class: 
+RBX=0x000000cc625ed070 is pointing into the stack for thread: 0x000002a2b0a3e000
+RCX=0x000002a2c13e4958 is an oop: [Ljava.lang.Class; 
+{0x000002a2c13e4958} - klass: 'java/lang/Class'[]
+ - length: 1
+RDX=0x00000000d14f4c58 is an unknown value
+RSP=0x000000cc625eb560 is pointing into the stack for thread: 0x000002a2b0a3e000
+RBP=0x000000cc625ebc40 is pointing into the stack for thread: 0x000002a2b0a3e000
+RSI=0x000000cc625ed8b0 is pointing into the stack for thread: 0x000002a2b0a3e000
+RDI=0x000000cc625ec3f0 is pointing into the stack for thread: 0x000002a2b0a3e000
+R8 =0x000002a2bed096e0 is at code_begin+1872 in an Interpreter codelet
+invoke return entry points  [0x000002a2bed08f90, 0x000002a2bed097b0]  2080 bytes
+R9 =0x000002a2c13e4930 is an oop: sun.reflect.annotation.AnnotationInvocationHandler 
+{0x000002a2c13e4930} - klass: 'sun/reflect/annotation/AnnotationInvocationHandler'
+ - ---- fields (total size 5 words):
+ - private final strict 'type' 'Ljava/lang/Class;' @16  a 'java/lang/Class'{0x000002a2c85ec668} = 'java/beans/BeanProperty' (c85ec668 2a2)
+ - private final strict 'memberValues' 'Ljava/util/Map;' @24  a 'java/util/LinkedHashMap'{0x000002a2c13e44d0} (c13e44d0 2a2)
+ - private volatile transient 'memberMethods' '[Ljava/lang/reflect/Method;' @32  NULL (0 0)
+R10=0x000002a2c13e49b8 is an oop: com.sun.proxy.$Proxy12 
+{0x000002a2c13e49b8} - klass: 'com/sun/proxy/$Proxy12'
+ - ---- fields (total size 3 words):
+ - protected 'h' 'Ljava/lang/reflect/InvocationHandler;' @16  a 'sun/reflect/annotation/AnnotationInvocationHandler'{0x000002a2c13e4930} (c13e4930 2a2)
+R11=0x000000cc625eae10 is pointing into the stack for thread: 0x000002a2b0a3e000
+R12=0x0 is NULL
+R13=0x000000cc625eb6c8 is pointing into the stack for thread: 0x000002a2b0a3e000
+R14=0x0000000000000002 is an unknown value
+R15=0x000000cc625ec558 is pointing into the stack for thread: 0x000002a2b0a3e000
+
+
+Registers:
+RAX=0x000002a2d0f0edb0, RBX=0x000000cc625ed070, RCX=0x000002a2c13e4958, RDX=0x00000000d14f4c58
+RSP=0x000000cc625eb560, RBP=0x000000cc625ebc40, RSI=0x000000cc625ed8b0, RDI=0x000000cc625ec3f0
+R8 =0x000002a2bed096e0, R9 =0x000002a2c13e4930, R10=0x000002a2c13e49b8, R11=0x000000cc625eae10
+R12=0x0000000000000000, R13=0x000000cc625eb6c8, R14=0x0000000000000002, R15=0x000000cc625ec558
+RIP=0x00007ffd0746fb4c, EFLAGS=0x0000000000000202
+
+Top of Stack: (sp=0x000000cc625eb560)
+0x000000cc625eb560:   0000000000000000 000000cc625ed070
+0x000000cc625eb570:   000000cc625ed8b0 00007ffca0d2bdb1
+0x000000cc625eb580:   00000081e06d7363 0000000000000000
+0x000000cc625eb590:   00007ffd0746fb4c 0000000000000004
+0x000000cc625eb5a0:   0000000019930520 000000cc625eda18
+0x000000cc625eb5b0:   00007ffca0d790a0 00007ffca0d10000
+0x000000cc625eb5c0:   00009e1a774fbff5 00007ffca0d60472
+0x000000cc625eb5d0:   000000cc625ed070 00007ffcf20f3511
+0x000000cc625eb5e0:   000000cc00000000 00007ffcf20f8154
+0x000000cc625eb5f0:   00007ffcf21542b0 00007ffcf2154280
+0x000000cc625eb600:   000000cc625ec3f0 00007ffcf20f3451
+0x000000cc625eb610:   000000cc625ed070 000000cc625ed8b0
+0x000000cc625eb620:   0000c7f16df2537c 00007ffcf2154280
+0x000000cc625eb630:   000000cc625ed070 00007ffcf20f27b3
+0x000000cc625eb640:   00007ffca0d60430 000000cc625ec558
+0x000000cc625eb650:   000002a200000100 000002a2c13d1238 
+
+Instructions: (pc=0x00007ffd0746fb4c)
+0x00007ffd0746fa4c:   ff 4c 8d 05 8c d9 2d 00 33 d2 b9 00 00 10 00 e8
+0x00007ffd0746fa5c:   a0 41 fe ff 4c 8b f0 48 89 44 24 58 48 85 c0 0f
+0x00007ffd0746fa6c:   84 0b fe ff ff 4c 8d 05 b0 d9 2d 00 33 d2 8d 4a
+0x00007ffd0746fa7c:   02 e8 7e 41 fe ff 48 8b f8 48 89 44 24 50 e9 ed
+0x00007ffd0746fa8c:   fd ff ff 45 33 c0 49 8b d7 48 83 c9 ff e8 c2 a5
+0x00007ffd0746fa9c:   01 00 e9 08 ff ff ff 48 8b 0d c6 c4 30 00 e8 f1
+0x00007ffd0746faac:   c3 fd ff 48 8b cf e8 89 98 fc ff e9 f8 fe ff ff
+0x00007ffd0746fabc:   49 8b ce e8 7c 98 fc ff e9 f4 fe ff ff 48 8b ce
+0x00007ffd0746facc:   e8 6f 98 fc ff e9 f0 fe ff ff cc cc 71 18 d3 7a
+0x00007ffd0746fadc:   1a 87 89 f9 48 81 ec d8 00 00 00 48 8b 05 02 95
+0x00007ffd0746faec:   30 00 48 33 c4 48 89 84 24 c0 00 00 00 48 83 64
+0x00007ffd0746fafc:   24 28 00 48 8d 05 da ff ff ff 83 e2 01 89 4c 24
+0x00007ffd0746fb0c:   20 89 54 24 24 48 89 44 24 30 4d 85 c9 74 4f b8
+0x00007ffd0746fb1c:   0f 00 00 00 48 8d 4c 24 40 44 3b c0 49 8b d1 41
+0x00007ffd0746fb2c:   0f 46 c0 44 8b c0 44 89 44 24 38 49 c1 e0 03 e8
+0x00007ffd0746fb3c:   b7 e0 07 00 48 8d 4c 24 20 48 ff 15 a4 14 21 00
+0x00007ffd0746fb4c:   0f 1f 44 00 00 48 8b 8c 24 c0 00 00 00 48 33 cc
+0x00007ffd0746fb5c:   e8 9f 08 05 00 48 81 c4 d8 00 00 00 c3 cc 83 64
+0x00007ffd0746fb6c:   24 38 00 eb cf cc cc cc cc cc cc cc 48 8b c4 48
+0x00007ffd0746fb7c:   89 58 08 48 89 70 10 48 89 78 18 4c 89 68 20 55
+0x00007ffd0746fb8c:   41 56 41 57 48 8d 68 a1 48 81 ec e0 00 00 00 48
+0x00007ffd0746fb9c:   8b 05 4e 94 30 00 48 33 c4 48 89 45 3f 45 33 ff
+0x00007ffd0746fbac:   66 c7 45 2b 00 05 48 8d 45 c7 44 89 7d 27 48 89
+0x00007ffd0746fbbc:   44 24 50 48 8d 4d 27 44 89 7c 24 48 45 33 c9 44
+0x00007ffd0746fbcc:   89 7c 24 40 45 8d 47 12 44 89 7c 24 38 b2 01 44
+0x00007ffd0746fbdc:   89 7c 24 30 41 8b df 44 89 7c 24 28 41 8b ff 44
+0x00007ffd0746fbec:   89 7c 24 20 45 8b f7 44 89 7d 2f 66 c7 45 33 00
+0x00007ffd0746fbfc:   01 44 89 7d 37 66 c7 45 3b 00 10 4c 89 7d c7 4c
+0x00007ffd0746fc0c:   89 7d cf 4c 89 7d d7 4c 89 7d df 48 ff 15 f2 14
+0x00007ffd0746fc1c:   21 00 0f 1f 44 00 00 85 c0 0f 88 a7 02 00 00 48
+0x00007ffd0746fc2c:   8d 45 cf 41 b9 20 02 00 00 48 89 44 24 50 45 8d
+0x00007ffd0746fc3c:   6f 02 44 89 7c 24 48 45 8d 47 20 44 89 7c 24 40 
+
+
+Stack slot to memory mapping:
+stack at sp + 0 slots: 0x0 is NULL
+stack at sp + 1 slots: 0x000000cc625ed070 is pointing into the stack for thread: 0x000002a2b0a3e000
+stack at sp + 2 slots: 0x000000cc625ed8b0 is pointing into the stack for thread: 0x000002a2b0a3e000
+stack at sp + 3 slots: 0x00007ffca0d2bdb1 _jpype.cp39-win_amd64.pyd
+stack at sp + 4 slots: 0x00000081e06d7363 is an unknown value
+stack at sp + 5 slots: 0x0 is NULL
+stack at sp + 6 slots: 0x00007ffd0746fb4c KERNELBASE.dll
+stack at sp + 7 slots: 0x0000000000000004 is an unknown value
+
+
+---------------  P R O C E S S  ---------------
+
+Threads class SMR info:
+_java_thread_list=0x000002a2d3bad7a0, length=20, elements={
+0x000002a2b0a3e000, 0x000002a2b5e6a000, 0x000002a2b5e7b000, 0x000002a2b5e8f800,
+0x000002a2b5ed6800, 0x000002a2b5edb000, 0x000002a2b5edc000, 0x000002a2b5ede800,
+0x000002a2b5e2b000, 0x000002a2b043a000, 0x000002a2b043d800, 0x000002a2b5f8b000,
+0x000002a2b5f88800, 0x000002a2b5f88000, 0x000002a2b043e000, 0x000002a2b0439800,
+0x000002a2d3232800, 0x000002a2d3233000, 0x000002a2d3230800, 0x000002a2d3235800
+}
+
+Java Threads: ( => current thread )
+=>0x000002a2b0a3e000 JavaThread "main" [_thread_in_native, id=12048, stack(0x000000cc62400000,0x000000cc625f0000)]
+  0x000002a2b5e6a000 JavaThread "Reference Handler" daemon [_thread_blocked, id=29672, stack(0x000000cc64cb0000,0x000000cc64ea0000)]
+  0x000002a2b5e7b000 JavaThread "Finalizer" daemon [_thread_blocked, id=17212, stack(0x000000cc64ea0000,0x000000cc65090000)]
+  0x000002a2b5e8f800 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=17784, stack(0x000000cc65090000,0x000000cc65280000)]
+  0x000002a2b5ed6800 JavaThread "Attach Listener" daemon [_thread_blocked, id=20772, stack(0x000000cc65280000,0x000000cc65470000)]
+  0x000002a2b5edb000 JavaThread "Service Thread" daemon [_thread_blocked, id=30228, stack(0x000000cc65470000,0x000000cc65660000)]
+  0x000002a2b5edc000 JavaThread "C1 CompilerThread0" daemon [_thread_blocked, id=9436, stack(0x000000cc65660000,0x000000cc65850000)]
+  0x000002a2b5ede800 JavaThread "Sweeper thread" daemon [_thread_blocked, id=7444, stack(0x000000cc65850000,0x000000cc65a40000)]
+  0x000002a2b5e2b000 JavaThread "Common-Cleaner" daemon [_thread_blocked, id=19912, stack(0x000000cc65a40000,0x000000cc65c30000)]
+  0x000002a2b043a000 JavaThread "Java2D Disposer" daemon [_thread_blocked, id=28744, stack(0x000000cc66200000,0x000000cc663f0000)]
+  0x000002a2b043d800 JavaThread "AWT-Windows" daemon [_thread_in_native, id=17728, stack(0x000000cc665e0000,0x000000cc667d0000)]
+  0x000002a2b5f8b000 JavaThread "ForkJoinPool.commonPool-worker-3" daemon [_thread_blocked, id=6132, stack(0x000000cc667d0000,0x000000cc669c0000)]
+  0x000002a2b5f88800 JavaThread "ForkJoinPool.commonPool-worker-5" daemon [_thread_blocked, id=28696, stack(0x000000cc67180000,0x000000cc67370000)]
+  0x000002a2b5f88000 JavaThread "ForkJoinPool.commonPool-worker-7" daemon [_thread_blocked, id=5648, stack(0x000000cc67370000,0x000000cc67560000)]
+  0x000002a2b043e000 JavaThread "ForkJoinPool.commonPool-worker-11" daemon [_thread_blocked, id=7844, stack(0x000000cc67750000,0x000000cc67940000)]
+  0x000002a2b0439800 JavaThread "ForkJoinPool.commonPool-worker-15" daemon [_thread_blocked, id=28592, stack(0x000000cc68ca0000,0x000000cc68e90000)]
+  0x000002a2d3232800 JavaThread "ForkJoinPool.commonPool-worker-9" daemon [_thread_blocked, id=26704, stack(0x000000cc629d0000,0x000000cc62bc0000)]
+  0x000002a2d3233000 JavaThread "Quit" [_thread_blocked, id=24652, stack(0x000000cc688c0000,0x000000cc68ab0000)]
+  0x000002a2d3230800 JavaThread "ToolkitShutdown" daemon [_thread_in_native, id=30448, stack(0x000000cc67560000,0x000000cc67750000)]
+  0x000002a2d3235800 JavaThread "Thread-0" [_thread_in_native, id=29420, stack(0x000000cc694d0000,0x000000cc696c0000)]
+
+Other Threads:
+  0x000002a2b5e48800 VMThread "VM Thread" [stack: 0x000000cc64ac0000,0x000000cc64cb0000] [id=13392]
+  0x000002a2b5ff1800 WatcherThread [stack: 0x000000cc65c30000,0x000000cc65e20000] [id=15488]
+
+Threads with active compile tasks:
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap:
+ def new generation   total 61184K, used 6713K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,  12% used [0x000002a2c0e00000, 0x000002a2c148e610, 0x000002a2c4320000)
+  from space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 54670K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  40% used [0x000002a2c6350000, 0x000002a2c98b3b30, 0x000002a2c98b3c00, 0x000002a2ce7eb000)
+ Metaspace       used 51399K, capacity 51842K, committed 52224K, reserved 53248K
+
+Card table byte_map: [0x000002a2b4f00000,0x000002a2b4f90000] _byte_map_base: 0x000002a1638f9000
+
+Polling page: 0x000002a2b4e60000
+
+Metaspace:
+
+Usage:
+   50.63 MB capacity,    50.20 MB (>99%) used,   321.48 KB ( <1%) free+waste,   120.69 KB ( <1%) overhead. 
+
+Virtual space:
+     52.00 MB reserved,      51.00 MB ( 98%) committed 
+
+Chunk freelists:
+254.00 KB
+
+MaxMetaspaceSize: 17179869184.00 GB
+No class space
+Initial GC threshold: 12.00 MB
+Current GC threshold: 84.17 MB
+CDS: off
+
+CodeCache: size=32768Kb used=6270Kb max_used=6270Kb free=26497Kb
+ bounds [0x000002a2bed00000, 0x000002a2bf320000, 0x000002a2c0d00000]
+ total_blobs=3958 nmethods=3246 adapters=643
+ compilation: enabled
+              stopped_count=0, restarted_count=0
+ full_count=0
+
+Compilation events (20 events):
+Event: 184.133 Thread 0x000002a2b5edc000 3237   !         org.scijava.event.bushe.ThreadSafeEventService::getSubscribers (56 bytes)
+Event: 184.133 Thread 0x000002a2b5edc000 nmethod 3237 0x000002a2bf31a450 code [0x000002a2bf31a600, 0x000002a2bf31a8f8]
+Event: 184.340 Thread 0x000002a2b5edc000 3238             sun.java2d.StateTrackableDelegate::createInstance (80 bytes)
+Event: 184.340 Thread 0x000002a2b5edc000 nmethod 3238 0x000002a2bf31aa90 code [0x000002a2bf31ac40, 0x000002a2bf31af08]
+Event: 190.897 Thread 0x000002a2b5edc000 3239             net.imglib2.loops.LoopUtils$LineProcessor::run (59 bytes)
+Event: 190.898 Thread 0x000002a2b5edc000 nmethod 3239 0x000002a2bf31b050 code [0x000002a2bf31b200, 0x000002a2bf31b378]
+Event: 264.011 Thread 0x000002a2b5edc000 3240             java.util.Properties::saveConvert (434 bytes)
+Event: 264.012 Thread 0x000002a2b5edc000 nmethod 3240 0x000002a2bf31b8d0 code [0x000002a2bf31bbc0, 0x000002a2bf31c588]
+Event: 264.013 Thread 0x000002a2b5edc000 3241   !         java.awt.EventQueue::removeSourceEvents (316 bytes)
+Event: 264.014 Thread 0x000002a2b5edc000 nmethod 3241 0x000002a2bf31ccd0 code [0x000002a2bf31cf30, 0x000002a2bf31d748]
+Event: 264.014 Thread 0x000002a2b5edc000 3242             java.util.IdentityHashMap::closeDeletion (107 bytes)
+Event: 264.014 Thread 0x000002a2b5edc000 nmethod 3242 0x000002a2bf31df50 code [0x000002a2bf31e0f0, 0x000002a2bf31e438]
+Event: 264.014 Thread 0x000002a2b5edc000 3243             java.util.WeakHashMap$HashIterator::hasNext (95 bytes)
+Event: 264.014 Thread 0x000002a2b5edc000 nmethod 3243 0x000002a2bf31e5d0 code [0x000002a2bf31e760, 0x000002a2bf31e928]
+Event: 264.015 Thread 0x000002a2b5edc000 3244   !         sun.awt.windows.WObjectPeer::dispose (50 bytes)
+Event: 264.015 Thread 0x000002a2b5edc000 nmethod 3244 0x000002a2bf31ea50 code [0x000002a2bf31ebf0, 0x000002a2bf31ee98]
+Event: 264.015 Thread 0x000002a2b5edc000 3245   !         sun.awt.AWTAutoShutdown::notifyPeerMapUpdated (70 bytes)
+Event: 264.015 Thread 0x000002a2b5edc000 nmethod 3245 0x000002a2bf31ef50 code [0x000002a2bf31f110, 0x000002a2bf31f598]
+Event: 264.016 Thread 0x000002a2b5edc000 3246             java.util.IdentityHashMap::remove (102 bytes)
+Event: 264.017 Thread 0x000002a2b5edc000 nmethod 3246 0x000002a2bf31f7d0 code [0x000002a2bf31f970, 0x000002a2bf31fb78]
+
+GC Heap History (20 events):
+Event: 11.188 GC heap before
+{Heap before GC invocations=46 (full 21):
+ def new generation   total 61184K, used 54400K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K, 100% used [0x000002a2c0e00000, 0x000002a2c4320000, 0x000002a2c4320000)
+  from space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 47070K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  34% used [0x000002a2c6350000, 0x000002a2c9147b70, 0x000002a2c9147c00, 0x000002a2ce7eb000)
+ Metaspace       used 47129K, capacity 47526K, committed 47616K, reserved 49152K
+}
+Event: 11.194 GC heap after
+{Heap after GC invocations=47 (full 21):
+ def new generation   total 61184K, used 4423K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,  65% used [0x000002a2c4320000, 0x000002a2c4771e68, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 66558K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  49% used [0x000002a2c6350000, 0x000002a2ca44f9a0, 0x000002a2ca44fa00, 0x000002a2ce7eb000)
+ Metaspace       used 47129K, capacity 47526K, committed 47616K, reserved 49152K
+}
+Event: 22.434 GC heap before
+{Heap before GC invocations=47 (full 21):
+ def new generation   total 61184K, used 58823K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K, 100% used [0x000002a2c0e00000, 0x000002a2c4320000, 0x000002a2c4320000)
+  from space 6784K,  65% used [0x000002a2c4320000, 0x000002a2c4771e68, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 66558K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  49% used [0x000002a2c6350000, 0x000002a2ca44f9a0, 0x000002a2ca44fa00, 0x000002a2ce7eb000)
+ Metaspace       used 49553K, capacity 49984K, committed 50176K, reserved 51200K
+}
+Event: 22.439 GC heap after
+{Heap after GC invocations=48 (full 21):
+ def new generation   total 61184K, used 2719K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,  40% used [0x000002a2c49c0000, 0x000002a2c4c67fa8, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 70910K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  52% used [0x000002a2c6350000, 0x000002a2ca88f930, 0x000002a2ca88fa00, 0x000002a2ce7eb000)
+ Metaspace       used 49553K, capacity 49984K, committed 50176K, reserved 51200K
+}
+Event: 22.479 GC heap before
+{Heap before GC invocations=48 (full 21):
+ def new generation   total 61184K, used 4071K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   2% used [0x000002a2c0e00000, 0x000002a2c0f51cd0, 0x000002a2c4320000)
+  from space 6784K,  40% used [0x000002a2c49c0000, 0x000002a2c4c67fa8, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 70910K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  52% used [0x000002a2c6350000, 0x000002a2ca88f930, 0x000002a2ca88fa00, 0x000002a2ce7eb000)
+ Metaspace       used 49553K, capacity 49984K, committed 50176K, reserved 51200K
+}
+Event: 22.519 GC heap after
+{Heap after GC invocations=49 (full 22):
+ def new generation   total 61184K, used 0K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 73634K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  54% used [0x000002a2c6350000, 0x000002a2cab389a8, 0x000002a2cab38a00, 0x000002a2ce7eb000)
+ Metaspace       used 49553K, capacity 49984K, committed 50176K, reserved 51200K
+}
+Event: 42.101 GC heap before
+{Heap before GC invocations=49 (full 22):
+ def new generation   total 61184K, used 54400K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K, 100% used [0x000002a2c0e00000, 0x000002a2c4320000, 0x000002a2c4320000)
+  from space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 73634K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  54% used [0x000002a2c6350000, 0x000002a2cab389a8, 0x000002a2cab38a00, 0x000002a2ce7eb000)
+ Metaspace       used 50018K, capacity 50471K, committed 50688K, reserved 51200K
+}
+Event: 42.103 GC heap after
+{Heap after GC invocations=50 (full 22):
+ def new generation   total 61184K, used 3669K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,  54% used [0x000002a2c4320000, 0x000002a2c46b5628, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 73634K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  54% used [0x000002a2c6350000, 0x000002a2cab389a8, 0x000002a2cab38a00, 0x000002a2ce7eb000)
+ Metaspace       used 50018K, capacity 50471K, committed 50688K, reserved 51200K
+}
+Event: 42.150 GC heap before
+{Heap before GC invocations=50 (full 22):
+ def new generation   total 61184K, used 9966K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,  11% used [0x000002a2c0e00000, 0x000002a2c14263d0, 0x000002a2c4320000)
+  from space 6784K,  54% used [0x000002a2c4320000, 0x000002a2c46b5628, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 73634K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  54% used [0x000002a2c6350000, 0x000002a2cab389a8, 0x000002a2cab38a00, 0x000002a2ce7eb000)
+ Metaspace       used 50373K, capacity 50867K, committed 50944K, reserved 51200K
+}
+Event: 42.197 GC heap after
+{Heap after GC invocations=51 (full 23):
+ def new generation   total 61184K, used 0K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 77825K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  57% used [0x000002a2c6350000, 0x000002a2caf506e0, 0x000002a2caf50800, 0x000002a2ce7eb000)
+ Metaspace       used 50311K, capacity 50790K, committed 50944K, reserved 51200K
+}
+Event: 63.038 GC heap before
+{Heap before GC invocations=51 (full 23):
+ def new generation   total 61184K, used 54400K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K, 100% used [0x000002a2c0e00000, 0x000002a2c4320000, 0x000002a2c4320000)
+  from space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 77825K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  57% used [0x000002a2c6350000, 0x000002a2caf506e0, 0x000002a2caf50800, 0x000002a2ce7eb000)
+ Metaspace       used 51104K, capacity 51581K, committed 51712K, reserved 53248K
+}
+Event: 63.042 GC heap after
+{Heap after GC invocations=52 (full 23):
+ def new generation   total 61184K, used 2138K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,  31% used [0x000002a2c49c0000, 0x000002a2c4bd6810, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 87569K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  64% used [0x000002a2c6350000, 0x000002a2cb8d45f8, 0x000002a2cb8d4600, 0x000002a2ce7eb000)
+ Metaspace       used 51104K, capacity 51581K, committed 51712K, reserved 53248K
+}
+Event: 143.009 GC heap before
+{Heap before GC invocations=52 (full 23):
+ def new generation   total 61184K, used 56554K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K, 100% used [0x000002a2c0e00000, 0x000002a2c4320000, 0x000002a2c4320000)
+  from space 6784K,  31% used [0x000002a2c49c0000, 0x000002a2c4bda9e0, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 87569K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  64% used [0x000002a2c6350000, 0x000002a2cb8d45f8, 0x000002a2cb8d4600, 0x000002a2ce7eb000)
+ Metaspace       used 51107K, capacity 51581K, committed 51712K, reserved 53248K
+}
+Event: 143.016 GC heap after
+{Heap after GC invocations=53 (full 23):
+ def new generation   total 61184K, used 4697K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,  69% used [0x000002a2c4320000, 0x000002a2c47b66c8, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 107057K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  78% used [0x000002a2c6350000, 0x000002a2ccbdc428, 0x000002a2ccbdc600, 0x000002a2ce7eb000)
+ Metaspace       used 51107K, capacity 51581K, committed 51712K, reserved 53248K
+}
+Event: 143.059 GC heap before
+{Heap before GC invocations=53 (full 23):
+ def new generation   total 61184K, used 5786K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   2% used [0x000002a2c0e00000, 0x000002a2c0f10398, 0x000002a2c4320000)
+  from space 6784K,  69% used [0x000002a2c4320000, 0x000002a2c47b66c8, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 107057K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  78% used [0x000002a2c6350000, 0x000002a2ccbdc428, 0x000002a2ccbdc600, 0x000002a2ce7eb000)
+ Metaspace       used 51107K, capacity 51581K, committed 51712K, reserved 53248K
+}
+Event: 143.114 GC heap after
+{Heap after GC invocations=54 (full 24):
+ def new generation   total 61184K, used 0K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 70803K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  52% used [0x000002a2c6350000, 0x000002a2ca874e18, 0x000002a2ca875000, 0x000002a2ce7eb000)
+ Metaspace       used 50871K, capacity 51298K, committed 51712K, reserved 53248K
+}
+Event: 157.349 GC heap before
+{Heap before GC invocations=54 (full 24):
+ def new generation   total 61184K, used 54400K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K, 100% used [0x000002a2c0e00000, 0x000002a2c4320000, 0x000002a2c4320000)
+  from space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+  to   space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+ tenured generation   total 135788K, used 70803K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  52% used [0x000002a2c6350000, 0x000002a2ca874e18, 0x000002a2ca875000, 0x000002a2ce7eb000)
+ Metaspace       used 50871K, capacity 51298K, committed 51712K, reserved 53248K
+}
+Event: 157.350 GC heap after
+{Heap after GC invocations=55 (full 24):
+ def new generation   total 61184K, used 244K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,   3% used [0x000002a2c49c0000, 0x000002a2c49fd1b8, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 70803K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  52% used [0x000002a2c6350000, 0x000002a2ca874e18, 0x000002a2ca875000, 0x000002a2ce7eb000)
+ Metaspace       used 50871K, capacity 51298K, committed 51712K, reserved 53248K
+}
+Event: 190.912 GC heap before
+{Heap before GC invocations=55 (full 24):
+ def new generation   total 61184K, used 36001K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,  65% used [0x000002a2c0e00000, 0x000002a2c30eb490, 0x000002a2c4320000)
+  from space 6784K,   3% used [0x000002a2c49c0000, 0x000002a2c49fd1b8, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 70803K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  52% used [0x000002a2c6350000, 0x000002a2ca874e18, 0x000002a2ca875000, 0x000002a2ce7eb000)
+ Metaspace       used 51049K, capacity 51436K, committed 51712K, reserved 53248K
+}
+Event: 190.953 GC heap after
+{Heap after GC invocations=56 (full 25):
+ def new generation   total 61184K, used 0K [0x000002a2c0e00000, 0x000002a2c5060000, 0x000002a2c6350000)
+  eden space 54400K,   0% used [0x000002a2c0e00000, 0x000002a2c0e00000, 0x000002a2c4320000)
+  from space 6784K,   0% used [0x000002a2c49c0000, 0x000002a2c49c0000, 0x000002a2c5060000)
+  to   space 6784K,   0% used [0x000002a2c4320000, 0x000002a2c4320000, 0x000002a2c49c0000)
+ tenured generation   total 135788K, used 54670K [0x000002a2c6350000, 0x000002a2ce7eb000, 0x000002a2d0e00000)
+   the space 135788K,  40% used [0x000002a2c6350000, 0x000002a2c98b3b30, 0x000002a2c98b3c00, 0x000002a2ce7eb000)
+ Metaspace       used 51049K, capacity 51436K, committed 51712K, reserved 53248K
+}
+
+Deoptimization events (2 events):
+Event: 11.149 Thread 0x000002a2b043b000 DEOPT PACKING pc=0x000002a2bef73aac sp=0x000000cc66d9bbf0
+Event: 11.149 Thread 0x000002a2b043b000 DEOPT UNPACKING pc=0x000002a2bed467fe sp=0x000000cc66d9b0b8 mode 0
+
+Classes redefined (0 events):
+No events
+
+Internal exceptions (20 events):
+Event: 42.117 Thread 0x000002a2b5f8b000 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c0efdb30}: 'void java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)'> (0x000002a2c0efdb30) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 42.117 Thread 0x000002a2b0439800 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c10cb6b8}: 'void java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)'> (0x000002a2c10cb6b8) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 42.117 Thread 0x000002a2b0438800 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c107fe78}: 'void java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)'> (0x000002a2c107fe78) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 42.118 Thread 0x000002a2b043e000 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c1048fc8}: 'void java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)'> (0x000002a2c1048fc8) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 42.118 Thread 0x000002a2b5f88000 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c0f696d0}: 'void java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)'> (0x000002a2c0f696d0) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 42.118 Thread 0x000002a2b5f89800 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c1012200}: 'void java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)'> (0x000002a2c1012200) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 42.118 Thread 0x000002a2b5f88800 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c0f32900}: 'void java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)'> (0x000002a2c0f32900) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 42.118 Thread 0x000002a2b0a3e000 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c11ac748}: 'void java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)'> (0x000002a2c11ac748) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 49.207 Thread 0x000002a2b5f8a800 Exception <a 'java/lang/ClassNotFoundException'{0x000002a2c125dc28}: sun/awt/windows/spi/awtLocalizationProvider> (0x000002a2c125dc28) thrown at [s\src\hotspot\share\classfile\systemDictionary.cpp, line 230]
+Event: 55.601 Thread 0x000002a2b043b000 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c1f865e8}: 'int java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, long)'> (0x000002a2c1f865e8) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 55.603 Thread 0x000002a2b043b000 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c1f92dc0}: 'void java.lang.invoke.DirectMethodHandle$Holder.invokeInterface(java.lang.Object, java.lang.Object, long)'> (0x000002a2c1f92dc0) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 63.803 Thread 0x000002a2b5f8a800 Exception <a 'java/lang/ClassCastException'{0x000002a2c0f3db68}: class java.awt.MenuItem cannot be cast to class java.awt.CheckboxMenuItem (java.awt.MenuItem and java.awt.CheckboxMenuItem are in module java.desktop of loader 'bootstrap')> (0x000002a2c0f3db68) thrown at [s\src\hotspot\share\interpreter\interpreterRuntime.cpp, line 459]
+Event: 133.990 Thread 0x000002a2b043b000 Exception <a 'java/lang/ClassCastException'{0x000002a2c0e7ef38}: class java.awt.MenuItem cannot be cast to class java.awt.CheckboxMenuItem (java.awt.MenuItem and java.awt.CheckboxMenuItem are in module java.desktop of loader 'bootstrap')> (0x000002a2c0e7ef38) thrown at [s\src\hotspot\share\interpreter\interpreterRuntime.cpp, line 459]
+Event: 134.116 Thread 0x000002a2d3233000 Exception <a 'java/lang/ClassCastException'{0x000002a2c2853e00}: class java.awt.MenuItem cannot be cast to class java.awt.CheckboxMenuItem (java.awt.MenuItem and java.awt.CheckboxMenuItem are in module java.desktop of loader 'bootstrap')> (0x000002a2c2853e00) thrown at [s\src\hotspot\share\interpreter\interpreterRuntime.cpp, line 459]
+Event: 134.120 Thread 0x000002a2d3233000 Exception <a 'java/lang/ClassCastException'{0x000002a2c2855148}: class java.awt.MenuItem cannot be cast to class java.awt.CheckboxMenuItem (java.awt.MenuItem and java.awt.CheckboxMenuItem are in module java.desktop of loader 'bootstrap')> (0x000002a2c2855148) thrown at [s\src\hotspot\share\interpreter\interpreterRuntime.cpp, line 459]
+Event: 179.583 Thread 0x000002a2b043b000 Exception <a 'java/lang/NoSuchMethodError'{0x000002a2c212f3b8}: 'java.lang.Object java.lang.invoke.DirectMethodHandle$Holder.invokeStatic(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, int)'> (0x000002a2c212f3b8) thrown at [s\src\hotspot\share\interpreter\linkResolver.cpp, line 773]
+Event: 188.103 Thread 0x000002a2d3231800 Exception <a 'java/lang/ClassCastException'{0x000002a2c2eb0778}: class java.awt.MenuItem cannot be cast to class java.awt.CheckboxMenuItem (java.awt.MenuItem and java.awt.CheckboxMenuItem are in module java.desktop of loader 'bootstrap')> (0x000002a2c2eb0778) thrown at [s\src\hotspot\share\interpreter\interpreterRuntime.cpp, line 459]
+Event: 264.028 Thread 0x000002a2b662e800 Exception <a 'java/lang/InterruptedException'{0x000002a2c0e00060}> (0x000002a2c0e00060) thrown at [s\src\hotspot\share\runtime\objectMonitor.cpp, line 1645]
+Event: 264.028 Thread 0x000002a2b043c800 Exception <a 'java/lang/InterruptedException'{0x000002a2c14065d8}> (0x000002a2c14065d8) thrown at [s\src\hotspot\share\runtime\objectMonitor.cpp, line 1645]
+Event: 264.028 Thread 0x000002a2d3233000 Exception <a 'java/lang/InterruptedException'{0x000002a2c10ecf70}> (0x000002a2c10ecf70) thrown at [s\src\hotspot\share\runtime\objectMonitor.cpp, line 1645]
+
+Events (20 events):
+Event: 264.024 loading class java/awt/Frame$AccessibleAWTFrame done
+Event: 264.024 loading class ij/ImageJ$ExceptionHandler
+Event: 264.024 loading class ij/ImageJ$ExceptionHandler done
+Event: 264.025 loading class javax/swing/TransferHandler$SwingDragGestureRecognizer
+Event: 264.025 loading class java/awt/dnd/DragGestureRecognizer
+Event: 264.025 loading class java/awt/dnd/DragGestureRecognizer done
+Event: 264.025 loading class javax/swing/TransferHandler$SwingDragGestureRecognizer done
+Event: 264.026 loading class javax/swing/TransferHandler$DragHandler
+Event: 264.026 loading class java/awt/dnd/DragGestureListener
+Event: 264.026 loading class java/awt/dnd/DragGestureListener done
+Event: 264.026 loading class java/awt/dnd/DragSourceListener
+Event: 264.026 loading class java/awt/dnd/DragSourceListener done
+Event: 264.026 loading class javax/swing/TransferHandler$DragHandler done
+Event: 264.026 loading class javax/swing/TransferHandler$PropertyTransferable
+Event: 264.026 loading class javax/swing/TransferHandler$PropertyTransferable done
+Event: 264.028 Executing VM operation: ThreadDump
+Event: 264.028 Executing VM operation: ThreadDump done
+Event: 264.028 Thread 0x000002a2b662e800 Thread exited: 0x000002a2b662e800
+Event: 264.028 Thread 0x000002a2b043c800 Thread exited: 0x000002a2b043c800
+Event: 264.028 Thread 0x000002a2b043b000 Thread exited: 0x000002a2b043b000
+
+
+Dynamic libraries:
+0x00007ff764a80000 - 0x00007ff764a9c000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\python.exe
+0x00007ffd09ad0000 - 0x00007ffd09ce7000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x00007ffd081a0000 - 0x00007ffd08264000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x00007ffd07410000 - 0x00007ffd077ca000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x00007ffd072f0000 - 0x00007ffd07401000 	C:\WINDOWS\System32\ucrtbase.dll
+0x00007ffcf2140000 - 0x00007ffcf2159000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\VCRUNTIME140.dll
+0x00007ffc62870000 - 0x00007ffc62cdc000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\python39.dll
+0x00007ffd08ce0000 - 0x00007ffd08d51000 	C:\WINDOWS\System32\WS2_32.dll
+0x00007ffd09380000 - 0x00007ffd09494000 	C:\WINDOWS\System32\RPCRT4.dll
+0x00007ffd07b00000 - 0x00007ffd07bb2000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x00007ffd02fc0000 - 0x00007ffd02fca000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x00007ffd07a50000 - 0x00007ffd07af7000 	C:\WINDOWS\System32\msvcrt.dll
+0x00007ffd07980000 - 0x00007ffd07a27000 	C:\WINDOWS\System32\sechost.dll
+0x00007ffd06f10000 - 0x00007ffd06f38000 	C:\WINDOWS\System32\bcrypt.dll
+0x00007ffd065a0000 - 0x00007ffd065bb000 	C:\WINDOWS\SYSTEM32\CRYPTSP.dll
+0x00007ffd05d40000 - 0x00007ffd05d75000 	C:\WINDOWS\system32\rsaenh.dll
+0x00007ffd065c0000 - 0x00007ffd065cc000 	C:\WINDOWS\SYSTEM32\CRYPTBASE.dll
+0x00007ffd07270000 - 0x00007ffd072eb000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x00007ffcf2130000 - 0x00007ffcf213f000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\python3.DLL
+0x00007ffcf2110000 - 0x00007ffcf2127000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\_bz2.pyd
+0x00007ffced290000 - 0x00007ffced2ba000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\_lzma.pyd
+0x00007ffcf2100000 - 0x00007ffcf2109000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\shiboken6\Shiboken.pyd
+0x00007ffca3010000 - 0x00007ffca306d000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\shiboken6\shiboken6.abi3.dll
+0x00007ffcf20f0000 - 0x00007ffcf20fc000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\shiboken6\VCRUNTIME140_1.dll
+0x00007ffca2f80000 - 0x00007ffca300d000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\shiboken6\MSVCP140.dll
+0x00007ffc62260000 - 0x00007ffc62863000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\QtWidgets.pyd
+0x00007ffced090000 - 0x00007ffced0cb000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\pyside6.abi3.dll
+0x00007ffc5ee10000 - 0x00007ffc5f446000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\Qt6Widgets.dll
+0x00007ffc5df50000 - 0x00007ffc5e527000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\Qt6Core.dll
+0x00007ffc5e530000 - 0x00007ffc5ee10000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\Qt6Gui.dll
+0x00007ffd08b30000 - 0x00007ffd08cd5000 	C:\WINDOWS\System32\ole32.dll
+0x00007ffd077d0000 - 0x00007ffd0797e000 	C:\WINDOWS\System32\USER32.dll
+0x00007ffd071a0000 - 0x00007ffd0723a000 	C:\WINDOWS\System32\msvcp_win.dll
+0x00007ffd07240000 - 0x00007ffd07266000 	C:\WINDOWS\System32\win32u.dll
+0x00007ffd09960000 - 0x00007ffd09989000 	C:\WINDOWS\System32\GDI32.dll
+0x00007ffcf2b20000 - 0x00007ffcf2b3e000 	C:\WINDOWS\SYSTEM32\MPR.dll
+0x00007ffd07e10000 - 0x00007ffd0819f000 	C:\WINDOWS\System32\combase.dll
+0x00007ffd07080000 - 0x00007ffd0719b000 	C:\WINDOWS\System32\gdi32full.dll
+0x00007ffd08270000 - 0x00007ffd08ae8000 	C:\WINDOWS\System32\SHELL32.dll
+0x00007ffd06440000 - 0x00007ffd06468000 	C:\WINDOWS\SYSTEM32\USERENV.dll
+0x00007ffd09550000 - 0x00007ffd09627000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x00007ffd059d0000 - 0x00007ffd05a1e000 	C:\WINDOWS\SYSTEM32\AUTHZ.dll
+0x00007ffcf9610000 - 0x00007ffcf9629000 	C:\WINDOWS\SYSTEM32\NETAPI32.dll
+0x00007ffd04150000 - 0x00007ffd0417b000 	C:\WINDOWS\SYSTEM32\dwmapi.dll
+0x00007ffd03db0000 - 0x00007ffd03e61000 	C:\WINDOWS\SYSTEM32\UxTheme.dll
+0x00007ffd01a00000 - 0x00007ffd01c57000 	C:\WINDOWS\SYSTEM32\d3d11.dll
+0x00007ffd03f40000 - 0x00007ffd04037000 	C:\WINDOWS\SYSTEM32\dxgi.dll
+0x00007ffcfb8f0000 - 0x00007ffcfb916000 	C:\WINDOWS\SYSTEM32\d3d12.dll
+0x00007ffcf1730000 - 0x00007ffcf1739000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\MSVCP140_1.dll
+0x00007ffd01780000 - 0x00007ffd019f3000 	C:\WINDOWS\SYSTEM32\DWrite.dll
+0x00007ffce3df0000 - 0x00007ffce3e31000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\MSVCP140_2.dll
+0x00007ffcff740000 - 0x00007ffcff774000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x00007ffd05840000 - 0x00007ffd0584c000 	C:\WINDOWS\SYSTEM32\NETUTILS.DLL
+0x00007ffcf6e10000 - 0x00007ffcf6e38000 	C:\WINDOWS\SYSTEM32\SRVCLI.DLL
+0x00007ffd08af0000 - 0x00007ffd08b21000 	C:\WINDOWS\System32\IMM32.DLL
+0x00007ffc77310000 - 0x00007ffc77711000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\QtGui.pyd
+0x00007ffc4c4c0000 - 0x00007ffc4c837000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\QtCore.pyd
+0x00007ffced9d0000 - 0x00007ffced9f0000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\_ctypes.pyd
+0x00007ffcf1720000 - 0x00007ffcf172b000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\libffi-7.dll
+0x00007ffc4c0b0000 - 0x00007ffc4c4b2000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\_core\_multiarray_umath.cp39-win_amd64.pyd
+0x00007ffca0d90000 - 0x00007ffca0e2b000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy.libs\msvcp140-23ebcc0b37c8e3d074511f362feac48b.dll
+0x00007ffc4a150000 - 0x00007ffc4c0aa000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy.libs\libscipy_openblas64_-caad452230ae4ddb57899b8b3a33c55c.dll
+0x00007ffced680000 - 0x00007ffced693000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\_core\_multiarray_tests.cp39-win_amd64.pyd
+0x00007ffcea060000 - 0x00007ffcea07e000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\linalg\_umath_linalg.cp39-win_amd64.pyd
+0x00007ffc45920000 - 0x00007ffc4a144000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\Lib\site-packages\cv2\cv2.pyd
+0x00007ffd09990000 - 0x00007ffd09a90000 	C:\WINDOWS\System32\COMDLG32.dll
+0x00007ffd08df0000 - 0x00007ffd08eea000 	C:\WINDOWS\System32\shcore.dll
+0x00007ffd07d20000 - 0x00007ffd07d7e000 	C:\WINDOWS\System32\SHLWAPI.dll
+0x00007ffcf0d50000 - 0x00007ffcf0d59000 	C:\WINDOWS\SYSTEM32\WSOCK32.dll
+0x00007ffcf2510000 - 0x00007ffcf27a2000 	C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.22621.4541_none_2710d1c57384c085\COMCTL32.dll
+0x00007ffcf4ab0000 - 0x00007ffcf4b3a000 	C:\WINDOWS\SYSTEM32\MF.dll
+0x00007ffcf4c20000 - 0x00007ffcf4dee000 	C:\WINDOWS\SYSTEM32\MFPlat.DLL
+0x00007ffc9c3d0000 - 0x00007ffc9c4f1000 	C:\WINDOWS\SYSTEM32\MFReadWrite.dll
+0x00007ffd06a90000 - 0x00007ffd06ade000 	C:\WINDOWS\SYSTEM32\cfgmgr32.dll
+0x00007ffcf4670000 - 0x00007ffcf4a0b000 	C:\WINDOWS\SYSTEM32\MFCORE.DLL
+0x00007ffd05e50000 - 0x00007ffd05e68000 	C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+0x00007ffcf4410000 - 0x00007ffcf4443000 	C:\WINDOWS\SYSTEM32\RTWorkQ.DLL
+0x00007ffca0d10000 - 0x00007ffca0d86000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\_jpype.cp39-win_amd64.pyd
+0x00007ffce3cc0000 - 0x00007ffce3d04000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\_decimal.pyd
+0x00007ffce8140000 - 0x00007ffce8153000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\_hashlib.pyd
+0x00007ffc455d0000 - 0x00007ffc45916000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\libcrypto-1_1.dll
+0x00007ffce4950000 - 0x00007ffce4966000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\_socket.pyd
+0x00007ffd05850000 - 0x00007ffd0587d000 	C:\WINDOWS\SYSTEM32\IPHLPAPI.DLL
+0x00007ffcf15d0000 - 0x00007ffcf15d9000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\select.pyd
+0x00007ffce4730000 - 0x00007ffce4744000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\psutil\_psutil_windows.pyd
+0x00007ffd07e00000 - 0x00007ffd07e08000 	C:\WINDOWS\System32\PSAPI.DLL
+0x00007ffd05f90000 - 0x00007ffd05fdd000 	C:\WINDOWS\SYSTEM32\POWRPROF.dll
+0x00007ffcf1e80000 - 0x00007ffcf1ed0000 	C:\WINDOWS\SYSTEM32\pdh.dll
+0x00007ffd05f70000 - 0x00007ffd05f83000 	C:\WINDOWS\SYSTEM32\UMPDC.dll
+0x00007ffd05b90000 - 0x00007ffd05ba4000 	C:\WINDOWS\SYSTEM32\wtsapi32.dll
+0x00007ffcd3ea0000 - 0x00007ffcd3ecf000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random\bit_generator.cp39-win_amd64.pyd
+0x00007ffcd09f0000 - 0x00007ffcd0a1f000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random\_common.cp39-win_amd64.pyd
+0x00007ffc621b0000 - 0x00007ffc62252000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random\mtrand.cp39-win_amd64.pyd
+0x00007ffcbfaa0000 - 0x00007ffcbfae2000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random\_bounded_integers.cp39-win_amd64.pyd
+0x00007ffce4710000 - 0x00007ffce472b000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random\_mt19937.cp39-win_amd64.pyd
+0x00007ffce3210000 - 0x00007ffce3228000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random\_philox.cp39-win_amd64.pyd
+0x00007ffce17f0000 - 0x00007ffce180c000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random\_pcg64.cp39-win_amd64.pyd
+0x00007ffcdcd10000 - 0x00007ffcdcd24000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random\_sfc64.cp39-win_amd64.pyd
+0x00007ffc620f0000 - 0x00007ffc621ad000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random\_generator.cp39-win_amd64.pyd
+0x00007ffcf1520000 - 0x00007ffcf152b000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\pandas_parser.cp39-win_amd64.pyd
+0x00007ffced280000 - 0x00007ffced28c000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\pandas_datetime.cp39-win_amd64.pyd
+0x00007ffc601a0000 - 0x00007ffc602b5000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\interval.cp39-win_amd64.pyd
+0x00007ffc5dd80000 - 0x00007ffc5df48000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\hashtable.cp39-win_amd64.pyd
+0x00007ffcc8cc0000 - 0x00007ffcc8cf1000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\missing.cp39-win_amd64.pyd
+0x00007ffccd7e0000 - 0x00007ffccd80e000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\dtypes.cp39-win_amd64.pyd
+0x00007ffcd0f90000 - 0x00007ffcd0fa5000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\ccalendar.cp39-win_amd64.pyd
+0x00007ffcc9a30000 - 0x00007ffcc9a51000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\np_datetime.cp39-win_amd64.pyd
+0x00007ffcc08c0000 - 0x00007ffcc08fc000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\conversion.cp39-win_amd64.pyd
+0x00007ffccda40000 - 0x00007ffccda51000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\base.cp39-win_amd64.pyd
+0x00007ffc600c0000 - 0x00007ffc6019e000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\offsets.cp39-win_amd64.pyd
+0x00007ffc62060000 - 0x00007ffc620e1000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\timestamps.cp39-win_amd64.pyd
+0x00007ffca2f40000 - 0x00007ffca2f76000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\nattype.cp39-win_amd64.pyd
+0x00007ffc5dd00000 - 0x00007ffc5dd78000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\timedeltas.cp39-win_amd64.pyd
+0x00007ffca0cd0000 - 0x00007ffca0d0a000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\timezones.cp39-win_amd64.pyd
+0x00007ffced1e0000 - 0x00007ffced1ee000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\_zoneinfo.pyd
+0x000002a29c3e0000 - 0x000002a29c3e3000 	C:\WINDOWS\SYSTEM32\tzres.dll
+0x00007ffc9c210000 - 0x00007ffc9c256000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\fields.cp39-win_amd64.pyd
+0x00007ffc949c0000 - 0x00007ffc94a00000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\tzconversion.cp39-win_amd64.pyd
+0x00007ffcbfc40000 - 0x00007ffcbfc54000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\properties.cp39-win_amd64.pyd
+0x00007ffc6f210000 - 0x00007ffc6f263000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\parsing.cp39-win_amd64.pyd
+0x00007ffc6eb60000 - 0x00007ffc6ebaf000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\strptime.cp39-win_amd64.pyd
+0x00007ffc5dc90000 - 0x00007ffc5dcf8000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\period.cp39-win_amd64.pyd
+0x00007ffc77920000 - 0x00007ffc77953000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs\vectorized.cp39-win_amd64.pyd
+0x00007ffcbfbb0000 - 0x00007ffcbfbc1000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\ops_dispatch.cp39-win_amd64.pyd
+0x00007ffc45400000 - 0x00007ffc455c2000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\algos.cp39-win_amd64.pyd
+0x00007ffc45350000 - 0x00007ffc453f4000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\lib.cp39-win_amd64.pyd
+0x00007ffc45230000 - 0x00007ffc45344000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs\unicodedata.pyd
+0x00007ffc62020000 - 0x00007ffc62056000 	C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\ops.cp39-win_amd64.pyd
+
+dbghelp: loaded successfully - version: 4.0.5 - missing functions: none
+symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Users\luke\AppData\Local\Programs\Python\Python39;C:\WINDOWS\SYSTEM32;C:\Users\luke\AppData\Local\Programs\Python\Python39\DLLs;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\shiboken6;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\_core;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy.libs;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\linalg;C:\Users\luke\AppData\Local\Programs\Python\Python39\Lib\site-packages\cv2;C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.22621.4541_none_2710d1c57384c085;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\psutil;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\random;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\tslibs;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas\_libs\window;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\pandas.libs;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PIL;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\__check_build;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\.libs;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\_lib;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\numpy\fft;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\sparse;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\linalg;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy.libs;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\sparse\linalg\_dsolve;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\sparse\linalg\_eigen\arpack;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\sparse\linalg\_propack;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\sparse\csgraph;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\special;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\spatial;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\spatial\transform;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\ndimage;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\optimize;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\optimize\_trlib;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\optimize\_lsq;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\optimize\_highs;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\integrate;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\stats;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\stats\_boost;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\interpolate;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\stats\_levy_stable;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\_lib\_uarray;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\fft\_pocketfft;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\stats\_rcont;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\scipy\stats\_unuran;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\utils;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\metrics\cluster;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\preprocessing;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\metrics;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\metrics\_pairwise_distances_reduction;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\cluster;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\neighbors;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\linear_model;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\_loss;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\svm;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\decomposition;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\cluster\_hdbscan;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\manifold;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\sklearn\tree;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\plugins\platforms;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\plugins\styles;C:\Users\luke\AppData\Local\Programs\Python\Python39\lib\site-packages\PySide6\plugins\imageformats;G:\Java\jdk-11.0.25+9\bin\client;G:\Java\jdk-11.0.25+9\bin;C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_9425e4c3b1ac1c47;C:\Program Files\Common Files\microsoft shared\ink;C:\Program Files\Microsoft OneDrive\24.232.1118.0003;C:\Windows\Microsoft.NET\Framework64\v4.0.30319;C:\WINDOWS\assembly\NativeImages_v4.0.30319_64\mscorlib\9a860ac99a94a0422dc04d0dd9b0e341;C:\WINDOWS\assembly\NativeImages_v4.0.30319_64\System\2b7713af99b3adddc407d1cceeead769;C:\WINDOWS\assembly\NativeImages_v4.0.30319_64\System.Drawing\9019614ab6156db1137a367daf1d41be;C:\WINDOWS\System32\DriverStore\FileRepository\iastorpinningcomponent.inf_amd64_357b728ba88fb99a;C:\WINDOWS\assembly\NativeImages_v4.0.30319_64\System.Core\1930676c8ce057a26d3ff6706992775a;C:\WINDOWS\WinSxS\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.22621.4541_none_57fbc4aace173a53
+
+VM Arguments:
+jvm_args: --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED 
+java_command: <unknown>
+java_class_path (initial): C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\3D_Blob_Segmentation-4.0.0.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\3D_Objects_Counter-2.0.1.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\3D_Viewer-5.0.0.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\adapter-rxjava2-2.9.0.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\ahocorasick-0.2.4.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\aircompressor-0.21.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\alphanumeric-comparator-1.4.1.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\AnalyzeSkeleton_-3.4.2.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\animal-sniffer-annotations-1.23.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\Anisotropic_Diffusion_2D-2.0.1.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\annotations-13.0.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\annotations-4.1.1.4.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\ant-1.10.15.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\ant-launcher-1.10.15.jar;C:\Users\luke\.jgo\sc.fiji\fiji\RELEASE\23ea5dcb02ab11d995fbbaf559e6f6e4c1c1a6685cbe007410c264a38459c2c1\antlr-2.7.7.jar;C:\Users\lu
+Launcher Type: generic
+
+[Global flags]
+   size_t InitialHeapSize                          = 16777216                                  {product} {ergonomic}
+   size_t MaxHeapSize                              = 268435456                                 {product} {ergonomic}
+   size_t MaxNewSize                               = 89456640                                  {product} {ergonomic}
+   size_t MinHeapDeltaBytes                        = 196608                                    {product} {ergonomic}
+   size_t NewSize                                  = 5570560                                   {product} {ergonomic}
+    uintx NonProfiledCodeHeapSize                  = 0                                      {pd product} {ergonomic}
+   size_t OldSize                                  = 11206656                                  {product} {ergonomic}
+    uintx ProfiledCodeHeapSize                     = 0                                      {pd product} {ergonomic}
+     bool UseLargePagesIndividualAllocation        = false                                  {pd product} {ergonomic}
+     bool UseSerialGC                              = true                                      {product} {ergonomic}
+
+Logging:
+Log output configuration:
+ #0: stdout all=warning uptime,level,tags
+ #1: stderr all=off uptime,level,tags
+
+Environment Variables:
+JAVA_HOME=G:\Java\jdk-11.0.25+9
+PATH=C:\Users\luke\AppData\Local\Programs\Python\Python39\Lib\site-packages\cv2\../../x64/vc14/bin;C:\Users\luke\AppData\Local\Programs\Python\Python39\Lib\site-packages\PySide6;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.42.34433\bin\HostX64\x64;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\VC\VCPackages;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\TestWindow;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\bin\Roslyn;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\Extensions\Microsoft\CodeCoverage.Console;C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\\x64;C:\Program Files (x86)\Windows Kits\10\bin\\x64;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\\MSBuild\Current\Bin\amd64;C:\Windows\Microsoft.NET\Framework64\v4.0.30319;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\;C:\Program Files (x86)\VMware\VMware Workstation\bin\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\PuTTY\;C:\Program Files\Git\cmd;C:\Users\luke\AppData\Local\Programs\Python\Python39;C:\Users\luke\AppData\Local\Programs\Python\Python39\Scripts;C:\Program Files\dotnet\;C:\Program Files\swipl;G:\apache-maven-3.9.9\bin;G:\Java\jdk-11.0.25+9\bin;C:\Users\luke\AppData\Local\Programs\Python\Python39\Scripts\;C:\Users\luke\AppData\Local\Programs\Python\Python39\;C:\Users\luke\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\luke\AppData\Local\Programs\Python\Python313\;C:\Users\luke\AppData\Local\Programs\Python\Launcher\;C:\Users\luke\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x8
+USERNAME=luke
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 158 Stepping 13, GenuineIntel
+TMP=C:\Users\luke\AppData\Local\Temp
+TEMP=C:\Users\luke\AppData\Local\Temp
+
+
+
+---------------  S Y S T E M  ---------------
+
+OS: Windows 11 , 64 bit Build 22621 (10.0.22621.4391)
+OS uptime: 3 days 2:20 hours
+
+CPU:total 8 (initial active 8) (8 cores per cpu, 1 threads per core) family 6 model 158 stepping 13 microcode 0xfa, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, avx, avx2, aes, clmul, erms, 3dnowpref, lzcnt, tsc, tscinvbit, bmi1, bmi2, adx, fma
+
+Memory: 4k page, system-wide physical 32591M (20980M free)
+TotalPageFile size 35570M (AvailPageFile size 17163M)
+current process WorkingSet (physical memory assigned to process): 656M, peak: 754M
+current process commit charge ("private bytes"): 1097M, peak: 1206M
+
+vm_info: OpenJDK 64-Bit Client VM (11.0.25+9) for windows-amd64 JRE (11.0.25+9), built on Oct 15 2024 22:41:24 by "" with MS VC++ 17.7 (VS2022)
+
+END.
