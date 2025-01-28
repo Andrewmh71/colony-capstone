@@ -10,6 +10,10 @@ import imagej
 import scyjava as sj
 import os
 from sklearn.cluster import DBSCAN
+from scipy import ndimage as ndi
+from skimage.feature import peak_local_max
+from skimage.segmentation import watershed
+from skimage.morphology import label
 
 
 
@@ -96,9 +100,11 @@ class EllipseItem(QGraphicsEllipseItem):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        sj.config.add_option('-Xmx1g')
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ij = imagej.init('sc.fiji:fiji', headless=False)
+
 
         # Create an instance of ImageGraphicsView without adding it to a layout
         self.image_container = ImageGraphicsView(self)
@@ -171,6 +177,84 @@ class MainWindow(QMainWindow):
         self.pixmap = pixmap
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def process_image(self):
+        if self.pixmap is None:
+            QMessageBox.information(None, "Error", "No image loaded")
+            return
+
+        # Convert QPixmap to QImage
+        qimage = self.pixmap.toImage()
+
+        # Convert QImage to numpy array
+        width = qimage.width()
+        height = qimage.height()
+        channels = 4  # Assuming RGBA format
+        ptr = qimage.bits()
+        arr = np.array(ptr).reshape(height, width, channels)
+        if arr.shape[2] == 4:
+            arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
+        arr = np.clip(arr, 0, 255).astype(np.uint8)
+        # Convert numpy array to ImagePlus object
+        imp = self.ij.py.to_java(arr)
+
+      # Show the image in ImageJ
+        self.ij.ui().show(imp)
+
+      # Run commands in ImageJ
+        self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit
+        self.ij.py.run_macro("run('Threshold...');",)
+        lower_threshold, ok1 = QInputDialog.getInt(None, "Enter Lower Threshold", "Lower Threshold:", 0, 0, 255, 1)
+        self.ij.py.run_macro("run('Fill Holes');",)
+        self.ij.py.run_macro("run('Convert to Mask');",)
+        self.ij.py.run_macro("run('Watershed');",)  # Apply watershed
+        self.ij.py.run_macro("run('Remove Outliers...', 'radius=2 threshold=50 which=Bright');",)
+        self.ij.py.run_macro("run('Despeckle');",)
+      # Analyze particles with specific settings
+        self.ij.py.run_macro("run('Analyze Particles...', 'size=170-50000 circularity=0.35-1.00 show=Outlines display exclude summarize');",)
+
+      # # Optionally, you can save the result if needed
+      # # self.ij.io().save(imp, 'path_to_save_result')  # Uncomment to save
+
+      # # Close ImageJ after processing (optional)
+      #   self.ij.dispose()
+
+      # # Show success message
+      #   QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
+
+      # # Clear the ImageJ window
+      #   self.ij.window().clear()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # def process_image(self):
     #     if self.pixmap is None:
     #         QMessageBox.information(None, "Error", "No image loaded")
@@ -226,71 +310,48 @@ class MainWindow(QMainWindow):
     #     QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
 
 
-    def process_image(self):
-        if self.pixmap is None:
-            QMessageBox.information(None, "Error", "No image loaded")
-            return
+    # def process_image(self):
+    #     if self.pixmap is None:
+    #         QMessageBox.information(None, "Error", "No image loaded")
+    #         return
 
-        # Convert QPixmap to QImage
-        qimage = self.pixmap.toImage()
+    #     # Convert QPixmap to QImage
+    #     qimage = self.pixmap.toImage()
 
-        # Convert QImage to numpy array
-        width = qimage.width()
-        height = qimage.height()
-        channels = 4  # Assuming RGBA format
-        ptr = qimage.bits()
-        arr = np.array(ptr).reshape(height, width, channels)
+    #     # Convert QImage to numpy array
+    #     width = qimage.width()
+    #     height = qimage.height()
+    #     channels = 4  # Assuming RGBA format
+    #     ptr = qimage.bits()
+    #     arr = np.array(ptr).reshape(height, width, channels)
 
-        # Convert to grayscale if needed (use only the RGB channels if the image is RGBA)
-        if arr.shape[2] == 4:
-            arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
+    #     # Convert to grayscale if needed (use only the RGB channels if the image is RGBA)
+    #     if arr.shape[2] == 4:
+    #         arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
 
-        # Normalize to 8-bit (values from 0 to 255) if necessary
-        arr = np.clip(arr, 0, 255).astype(np.uint8)
+    #     # Normalize to 8-bit (values from 0 to 255) if necessary
+    #     arr = np.clip(arr, 0, 255).astype(np.uint8)
 
-        # Prompt the user for the lower and upper threshold values
+    #     # Prompt the user for the lower and upper threshold values
 
-        imp = self.ij.py.to_java(arr)
-        self.ij.ui().show(imp)
-        self.ij.py.run_macro("run('Threshold...');")
-        lower_threshold, ok1 = QInputDialog.getInt(None, "Enter Lower Threshold", "Lower Threshold:", 0, 0, 255, 1)
-        upper_threshold, ok2 = QInputDialog.getInt(None, "Enter Upper Threshold", "Upper Threshold:", 255, 0, 255, 1)
+    #     imp = self.ij.py.to_java(arr)
+    #     self.ij.ui().show(imp)
+    #     self.ij.py.run_macro("run('Threshold...');")
+    #     # Step 1: Convert to Binary (Make Binary)
+    #     self.ij.py.run_macro("run('Make Binary');")
 
-        if not ok1 or not ok2:
-            return  # If the user cancelled the input dialogs
+    #     # Step 2: Apply Watershed
+    #     self.ij.py.run_macro("run('Watershed');")
 
-        # Apply the threshold manually (binary mask creation)
-        thresholded = np.where((arr >= lower_threshold) & (arr <= upper_threshold), 255, 0)
+    #     # Step 3: Analyze Particles (Size 50-50000, Circularity 0.7-1.00)
+    #     self.ij.py.run_macro("run('Analyze Particles...', 'size=50-50000 circularity=0.7-1.00 show=[Outlines]');")
 
-        # Ensure the thresholded image is of correct uint8 type for display
-        thresholded = thresholded.astype(np.uint8)
+    #     results_table = self.ij.table()
+    #     particle_count = results_table.size()
+    #     # Wait for the user to finish
+    #     QMessageBox.information(None, "Bacteria Count", f"Number of bacteria detected: {particle_count}")
+    #     self.ij.window().clear()
 
-        # Convert the thresholded image (binary) back to QImage
-        thresholded_qimage = QImage(thresholded.data, thresholded.shape[1], thresholded.shape[0], QImage.Format_Grayscale8)
-
-        # Convert QImage to QPixmap for display
-        pixmap_8bit = QPixmap.fromImage(thresholded_qimage)
-
-        # Set the QPixmap to a QLabel or other widget for display
-        self.display_image(pixmap_8bit)
-
-        # Convert the thresholded numpy array into an ImageJ image (imp)
-        imp = self.ij.py.to_java(thresholded)
-
-        # Show the image in ImageJ
-        self.ij.ui().show(imp)
-
-        # Step 1: Convert to Binary (Make Binary)
-        self.ij.py.run_macro("run('Make Binary');")
-
-        # Step 2: Apply Watershed
-        self.ij.py.run_macro("run('Watershed');")
-
-        # Step 3: Analyze Particles (Size 50-50000, Circularity 0.7-1.00)
-        self.ij.py.run_macro("run('Analyze Particles...', 'size=50-50000 circularity=0.7-1.00 show=[Outlines]');")
-
-        # Wait for the user to finish
-        QMessageBox.information(None, "Success", "Image processed successfully")
 
 
 
