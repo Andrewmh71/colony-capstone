@@ -14,6 +14,9 @@ from scipy import ndimage as ndi
 from skimage.feature import peak_local_max
 from skimage.segmentation import watershed
 from skimage.morphology import label
+# from jnius import autoclass
+import scyjava
+from scyjava import jimport
 
 
 
@@ -187,7 +190,76 @@ class MainWindow(QMainWindow):
 
 
 
+    # def process_image(self):
+    #     if self.pixmap is None:
+    #         QMessageBox.information(None, "Error", "No image loaded")
+    #         return
 
+    #     # Convert QPixmap to QImage
+    #     qimage = self.pixmap.toImage()
+
+    #     # Convert QImage to numpy array
+    #     width = qimage.width()
+    #     height = qimage.height()
+    #     channels = 4  # Assuming RGBA format
+    #     ptr = qimage.bits()
+    #     arr = np.array(ptr).reshape(height, width, channels)
+    #     if arr.shape[2] == 4:
+    #         arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
+    #     arr = np.clip(arr, 0, 255).astype(np.uint8)
+    #     # Convert numpy array to ImagePlus object
+    #     imp = self.ij.py.to_java(arr)
+    #   # Show the image in ImageJ
+    #     self.ij.ui().show(imp)
+
+    #   # Run commands in ImageJ
+    #     self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit
+
+    #     # self.ij.ui().show(imp)
+
+
+    #     # image_to_thresh = self.ij.py.from_java(imp)
+    #     # image_to_thresh = np.array(image_to_thresh)
+
+    #     # # Apply an inverted simple threshold
+    #     # thresh_value = 170  # The threshold value
+    #     # max_value = 255  # Max value for the thresholded pixels (white)
+
+    #     # # Invert the threshold operation (black becomes white, white becomes black)
+    #     # retval, thresholded_image = cv2.threshold(image_to_thresh, thresh_value, max_value, cv2.THRESH_BINARY_INV)
+
+    #     # # Convert back to ImagePlus (Java object)
+    #     # imp = self.ij.py.to_java(thresholded_image)
+
+    #     # self.ij.ui().show(imp)
+    #   #   self.ij.py.run_macro("run('Threshold...');",)
+    #   #   lower_threshold, ok1 = QInputDialog.getInt(None, "Enter Lower Threshold", "Lower Threshold:", 0, 0, 255, 1)
+
+
+    #   #   self.ij.ui().show(imp)
+    #     self.ij.py.run_macro("run('Convert to Mask');",)
+    #     self.ij.py.run_macro("run('Fill Holes', '');",)
+
+    #     self.ij.py.run_macro("run('Watershed');",)  # Apply watershed
+    #     self.ij.py.run_macro("run('Remove Outliers...', 'radius=10 threshold=50 which=Bright');",)
+    #     for i in range(50):
+    #         self.ij.py.run_macro("run('Despeckle');",)
+    #   # # Analyze particles with specific settings
+    #     # self.ij.py.run_macro("run('Gaussian Blur...', 'sigma=2');",)
+
+    #     self.ij.py.run_macro("run('Analyze Particles...', 'size=200-50000 circularity=0.35-1.00 show=Outlines display exclude summarize');",)
+
+    #   # # # Optionally, you can save the result if needed
+    #   # # # self.ij.io().save(imp, 'path_to_save_result')  # Uncomment to save
+
+    #   # # # Close ImageJ after processing (optional)
+    #   # #   self.ij.dispose()
+
+    #   # # # Show success message
+    #   # #   QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
+
+    #   # # # Clear the ImageJ window
+    #   # #   self.ij.window().clear()
 
 
 
@@ -220,27 +292,78 @@ class MainWindow(QMainWindow):
 
       # Run commands in ImageJ
         self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit
-        self.ij.py.run_macro("run('Threshold...');",)
-        lower_threshold, ok1 = QInputDialog.getInt(None, "Enter Lower Threshold", "Lower Threshold:", 0, 0, 255, 1)
-        self.ij.py.run_macro("run('Fill Holes');",)
+
+        # self.ij.ui().show(imp)
+
+
+        # image_to_thresh = self.ij.py.from_java(imp)
+        # image_to_thresh = np.array(image_to_thresh)
+
+        # # Apply an inverted simple threshold
+        # thresh_value = 175  # The threshold value
+        # max_value = 255  # Max value for the thresholded pixels (white)
+
+        # # Invert the threshold operation (black becomes white, white becomes black)
+        # retval, thresholded_image = cv2.threshold(image_to_thresh, thresh_value, max_value, cv2.THRESH_BINARY_INV)
+        # # retval, thresholded_image = cv2.threshold(image_to_thresh, thresh_value, max_value, cv2.THRESH_BINARY)
+
+        # # Convert back to ImagePlus (Java object)
+        # imp = self.ij.py.to_java(thresholded_image)
+
+        # self.ij.ui().show(imp)
+
+
+        # Access and modify a preference (for example, black background setting)
+
+
+        # Access and modify a preference (for example, black background setting)
+
+
+        # self.ij.py.run_macro('setOption("BlackBackground", true);')
+        self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit
+
         self.ij.py.run_macro("run('Convert to Mask');",)
-        self.ij.py.run_macro("run('Watershed');",)  # Apply watershed
+        self.ij.py.run_macro('setThreshold(0, 0);')
+        self.ij.py.run_macro("run('Convert to Mask');",)
+        # self.ij.py.run_macro("run('Make Binary');",)
+
+
+
+
+        # self.ij.ui().setBlackBackground(True)
+        # # Optionally, print to confirm
+        # print(prefs.get('blackBackground'))  # Should print True
+        # self.ij.py.run_macro("run('Convert to Mask');",)
+
+        # # Optionally, show the inverted image
+
+        # self.ij.py.run_macro("run('transform.invert');",)
+      #   # self.ij.ui().show(imp)
+      #   # self.ij.py.run_macro("run('8-bit');",)
+        # self.ij.py.run_macro("run('Fill Holes', '');",)
+        self.ij.py.run_macro("run('Watershed');",)
         self.ij.py.run_macro("run('Remove Outliers...', 'radius=2 threshold=50 which=Bright');",)
-        self.ij.py.run_macro("run('Despeckle');",)
-      # Analyze particles with specific settings
-        self.ij.py.run_macro("run('Analyze Particles...', 'size=170-50000 circularity=0.35-1.00 show=Outlines display exclude summarize');",)
+      #   # self.ij.py.run_macro("run('Watershed');",)  # Apply watershed
+      #   # self.ij.py.run_macro("run('Remove Outliers...', 'radius=15 threshold=50 which=Bright');",)
+        for i in range(2):
+            self.ij.py.run_macro("run('Despeckle');",)
 
-      # # Optionally, you can save the result if needed
-      # # self.ij.io().save(imp, 'path_to_save_result')  # Uncomment to save
+      # # Analyze particles with specific settings
+        # self.ij.py.run_macro("run('Gaussian Blur...', 'sigma=2');",)
 
-      # # Close ImageJ after processing (optional)
-      #   self.ij.dispose()
+        self.ij.py.run_macro("run('Analyze Particles...', 'size=100-50000 circularity=0.60-1.00 show=Outlines display exclude summarize');",)
 
-      # # Show success message
-      #   QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
+      # # # Optionally, you can save the result if needed
+      # # # self.ij.io().save(imp, 'path_to_save_result')  # Uncomment to save
 
-      # # Clear the ImageJ window
-      #   self.ij.window().clear()
+      # # # Close ImageJ after processing (optional)
+      # #   self.ij.dispose()
+
+      # # # Show success message
+      # #   QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
+
+      # # # Clear the ImageJ window
+      # #   self.ij.window().clear()
 
 
 
@@ -351,6 +474,7 @@ class MainWindow(QMainWindow):
     #     # Wait for the user to finish
     #     QMessageBox.information(None, "Bacteria Count", f"Number of bacteria detected: {particle_count}")
     #     self.ij.window().clear()
+
 
 
 
