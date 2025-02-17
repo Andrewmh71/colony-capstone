@@ -10,7 +10,9 @@ import imagej
 import scyjava as sj
 import os
 from sklearn.cluster import DBSCAN
-
+import imageio
+from PIL import Image
+import pillow_heif
 
 
 
@@ -134,19 +136,30 @@ class MainWindow(QMainWindow):
         self.image_item = None
         self.drawing_enabled = False
 
+    pillow_heif.register_heif_opener()
     def open_image_dialog(self):
-        # Show file dialog with image filter
+    # Show file dialog with image filter (including HEIC)
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Open Image",
             "",
-            "Images (*.png *.jpg *.jpeg *.bmp *.gif)"
+            "Images (*.png *.jpg *.jpeg *.bmp *.gif *.heic)"
         )
 
         if file_path:
-            # Load the image and display it in the QGraphicsView
+            # Load the image using Pillow (with pillow-heif support)
+            image = Image.open(file_path)
+
+            # Convert the image to QPixmap to display in the QGraphicsView
+            image = image.convert("RGB")  # Ensure it's in RGB mode
+            data = image.tobytes("raw", "RGB")  # Convert to raw byte data
+            qim = QImage(data, image.width, image.height, image.width * 3, QImage.Format_RGB888)
+
+            # Convert QImage to QPixmap
+            pixmap = QPixmap.fromImage(qim)
+
+            # Display the image in the QGraphicsView
             self.file_path = file_path
-            pixmap = QPixmap(file_path)
             self.display_image(pixmap)
 
     def enable_ellipse_drawing(self):
