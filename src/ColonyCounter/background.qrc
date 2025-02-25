@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="newPrefix">
+    <file>images/beaver_bg.jpg</file>
+  </qresource>
+</RCC>
