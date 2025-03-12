@@ -45,6 +45,9 @@ class Ui_MainWindow(object):
         self.saveButton = QPushButton(self.centralwidget)
         self.saveButton.setObjectName(u"saveButton")
         self.saveButton.setGeometry(QRect(590, 0, 80, 24))
+        self.addBacteriaButton = QPushButton(self.centralwidget)
+        self.addBacteriaButton.setObjectName(u"addBacteriaButton")
+        self.addBacteriaButton.setGeometry(QRect(850, 0, 80, 24))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -69,6 +72,7 @@ class Ui_MainWindow(object):
         self.cropButton.setText(QCoreApplication.translate("MainWindow", u"Crop", None))
         self.analyzeButton.setText(QCoreApplication.translate("MainWindow", u"Analyze", None))
         self.saveButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))
+        self.addBacteriaButton.setText(QCoreApplication.translate("MainWindow", u"Add Particles", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
     # retranslateUi
 

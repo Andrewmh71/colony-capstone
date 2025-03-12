@@ -130,9 +130,14 @@ class MainWindow(QMainWindow):
 
         # Connect the crop button to enable ellipse drawing
         self.ui.cropButton.clicked.connect(self.enable_ellipse_drawing)
-
+        print(self.ui.saveButton)  # Should not be None
+        print(self.ui.addBacteriaButton)
         # Connect the save button to save the cropped image
         self.ui.saveButton.clicked.connect(self.save_cropped_image)
+
+        self.ui.addBacteriaButton.clicked.connect(self.add_colonies)
+
+
 
 
 
@@ -179,6 +184,22 @@ class MainWindow(QMainWindow):
         # Store the pixmap
         self.pixmap = pixmap
 
+    def add_colonies(self):
+        # # macro = """
+        # # rm = RoiManager.getInstance();
+        # # if (rm == null) rm = new RoiManager();
+        # # roi = getSelection();
+        # # if (roi != null) {
+        # #     rm.addRoi(roi);
+        # # } else {
+        # #     print("No selection found.");
+        # # }
+        # # """
+        # # self.ij.py.run_macro(macro)
+
+        # self.ij.py.run_macro("run('Add to Manager');")
+
+        # self.ij.py.run_macro("rm.addRoi(roi);",)  # Convert to 8-bit
 
 
 
@@ -188,82 +209,92 @@ class MainWindow(QMainWindow):
 
 
 
+        macro = """
+        run("Add to Manager");
+
+        if (!isOpen("ROI Manager")) {
+            run("ROI Manager...");
+        }
+
+        roiManager("Select", 0);
+
+        // Debug: Print selection type
+        print("Selection Type: " + selectionType());
+
+        isComposite = (selectionType() == 9); // Check for composite selection
+        print("Is Composite? " + isComposite);
+
+        if (isComposite) {
+            print("Attempting to split composite selection...");
+            roiManager("Split");
+            wait(200); // Give time for processing
+        }
+
+        // Get the updated ROI count
+        roiCountAfter = roiManager("count");
+        print("ROI Count After Split: " + roiCountAfter);
+
+        if (!isComposite || roiCountAfter == 1) {
+            // Process single ROI directly
+            roiManager("Select", 0);
+            roiManager("Measure");
+            run("Add Selection...");
+            roiManager("Delete");
+        } else {
+            // Remove original composite ROI
+            roiManager("Select", 0);
+            roiManager("Delete");
+
+            roiCountAfter = roiManager("count"); // Update count
+
+            // Process each split ROI
+            for (i = roiCountAfter - 1; i >= 0; i--) {
+                roiManager("Select", i);
+                roiManager("Measure");
+                run("Add Selection...");
+                roiManager("Delete");
+            }
+        }
 
 
-    # def process_image(self):
-    #     if self.pixmap is None:
-    #         QMessageBox.information(None, "Error", "No image loaded")
-    #         return
 
-    #     # Convert QPixmap to QImage
-    #     qimage = self.pixmap.toImage()
+        """
 
-    #     # Convert QImage to numpy array
-    #     width = qimage.width()
-    #     height = qimage.height()
-    #     channels = 4  # Assuming RGBA format
-    #     ptr = qimage.bits()
-    #     arr = np.array(ptr).reshape(height, width, channels)
-    #     if arr.shape[2] == 4:
-    #         arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
-    #     arr = np.clip(arr, 0, 255).astype(np.uint8)
-    #     # Convert numpy array to ImagePlus object
-    #     imp = self.ij.py.to_java(arr)
-    #   # Show the image in ImageJ
-    #     self.ij.ui().show(imp)
-
-    #   # Run commands in ImageJ
-    #     self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit
-
-    #     # self.ij.ui().show(imp)
-
-
-    #     # image_to_thresh = self.ij.py.from_java(imp)
-    #     # image_to_thresh = np.array(image_to_thresh)
-
-    #     # # Apply an inverted simple threshold
-    #     # thresh_value = 170  # The threshold value
-    #     # max_value = 255  # Max value for the thresholded pixels (white)
-
-    #     # # Invert the threshold operation (black becomes white, white becomes black)
-    #     # retval, thresholded_image = cv2.threshold(image_to_thresh, thresh_value, max_value, cv2.THRESH_BINARY_INV)
-
-    #     # # Convert back to ImagePlus (Java object)
-    #     # imp = self.ij.py.to_java(thresholded_image)
-
-    #     # self.ij.ui().show(imp)
-    #   #   self.ij.py.run_macro("run('Threshold...');",)
-    #   #   lower_threshold, ok1 = QInputDialog.getInt(None, "Enter Lower Threshold", "Lower Threshold:", 0, 0, 255, 1)
-
-
-    #   #   self.ij.ui().show(imp)
-    #     self.ij.py.run_macro("run('Convert to Mask');",)
-    #     self.ij.py.run_macro("run('Fill Holes', '');",)
-
-    #     self.ij.py.run_macro("run('Watershed');",)  # Apply watershed
-    #     self.ij.py.run_macro("run('Remove Outliers...', 'radius=10 threshold=50 which=Bright');",)
-    #     for i in range(50):
-    #         self.ij.py.run_macro("run('Despeckle');",)
-    #   # # Analyze particles with specific settings
-    #     # self.ij.py.run_macro("run('Gaussian Blur...', 'sigma=2');",)
-
-    #     self.ij.py.run_macro("run('Analyze Particles...', 'size=200-50000 circularity=0.35-1.00 show=Outlines display exclude summarize');",)
-
-    #   # # # Optionally, you can save the result if needed
-    #   # # # self.ij.io().save(imp, 'path_to_save_result')  # Uncomment to save
-
-    #   # # # Close ImageJ after processing (optional)
-    #   # #   self.ij.dispose()
-
-    #   # # # Show success message
-    #   # #   QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
-
-    #   # # # Clear the ImageJ window
-    #   # #   self.ij.window().clear()
+        self.ij.py.run_macro(macro)
 
 
 
 
+
+
+
+        # macro = """
+        # run("Add to Manager");
+        # if (!isOpen("ROI Manager")) {
+        #     run("ROI Manager...");
+        # }
+        # roiCount = roiManager("count");
+
+        # if (roiCount == 1) {
+        #     roiManager("Measure");
+        #     run("Add Selection...");
+        #     roiManager("Delete");
+        # } else {
+        #     roiManager("Select", 0);
+        #     roiManager("Delete"); // Remove composite ROI
+
+        #     roiCount = roiManager("count"); // Update count after deletion
+
+        #     for (i = 0; i < roiCount; i++) {
+        #         roiManager("Select", i);
+        #         roiManager("Measure");
+        #         run("Add Selection...");
+        #         roiManager("Delete");
+        #     }
+        # }
+        # """
+
+        # self.ij.py.run_macro(macro)
 
 
 
@@ -440,17 +471,23 @@ class MainWindow(QMainWindow):
       #   # self.ij.ui().show(imp)
       #   # self.ij.py.run_macro("run('8-bit');",)
         # self.ij.py.run_macro("run('Fill Holes', '');",)
-        self.ij.py.run_macro("run('Watershed');",)
+        # self.ij.py.run_macro("run('Watershed');",)
         # self.ij.py.run_macro("run('Remove Outliers...', 'radius=2 threshold=50 which=Bright');",)
       #   # self.ij.py.run_macro("run('Watershed');",)  # Apply watershed
       #   # self.ij.py.run_macro("run('Remove Outliers...', 'radius=15 threshold=50 which=Bright');",)
-        self.ij.py.run_macro("run('Remove Outliers...', 'radius=3 threshold=50 which=Bright');",)
+        self.ij.py.run_macro("run('Remove Outliers...', 'radius=15 threshold=50 which=Bright');",)
         for i in range(2):
             self.ij.py.run_macro("run('Despeckle');",)
+
       # # Analyze particles with specific settings
         # self.ij.py.run_macro("run('Gaussian Blur...', 'sigma=2');",)
 
-        self.ij.py.run_macro("run('Analyze Particles...', 'size=50-50000 circularity=0.65-1.00 show=Outlines display exclude summarize');",)
+        # self.ij.py.run_macro("run('Analyze Particles...', 'size=50-50000 circularity=0.65-1.00 show=Outlines display exclude summarize overlay');",)
+        self.ij.py.run_macro("run('Watershed');",)
+        self.ij.py.run_macro("run('Analyze Particles...', 'size=120-50000 circularity=0.80-1.00 display exclude summarize overlay');",)
+
+        self.ij.py.run_macro("setTool('freehand');",)
+        self.ij.ui().show(imp)
 
       # # # Optionally, you can save the result if needed
       # # # self.ij.io().save(imp, 'path_to_save_result')  # Uncomment to save
@@ -463,119 +500,6 @@ class MainWindow(QMainWindow):
 
       # # # Clear the ImageJ window
       # #   self.ij.window().clear()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # def process_image(self):
-    #     if self.pixmap is None:
-    #         QMessageBox.information(None, "Error", "No image loaded")
-    #         return
-
-    #     # Convert QPixmap to QImage
-    #     qimage = self.pixmap.toImage()
-
-    #     # Convert QImage to numpy array
-    #     width = qimage.width()
-    #     height = qimage.height()
-    #     channels = 4  # Assuming RGBA format
-    #     ptr = qimage.bits()
-    #     arr = np.array(ptr).reshape(height, width, channels)
-
-    #     # Convert to grayscale if needed (use only the RGB channels if the image is RGBA)
-    #     if arr.shape[2] == 4:
-    #         arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
-
-    #     # Normalize to 8-bit (values from 0 to 255) if necessary
-    #     arr = np.clip(arr, 0, 255).astype(np.uint8)
-
-    #     imp = self.ij.py.to_java(arr)
-    #     self.ij.ui().show(imp)
-    #     self.ij.py.run_macro("run('Threshold...');")
-    #     # Prompt the user for the lower and upper threshold values
-    #     lower_threshold, ok1 = QInputDialog.getInt(None, "Enter Lower Threshold", "Lower Threshold:", 0, 0, 255, 1)
-    #     upper_threshold, ok2 = QInputDialog.getInt(None, "Enter Upper Threshold", "Upper Threshold:", 255, 0, 255, 1)
-
-    #     if not ok1 or not ok2:
-    #         return  # If the user cancelled the input dialogs
-
-    #     # Apply the threshold manually (binary mask creation)
-    #     thresholded = np.where((arr >= lower_threshold) & (arr <= upper_threshold), 255, 0)
-
-    #     # Ensure the thresholded image is of correct uint8 type for display
-    #     thresholded = thresholded.astype(np.uint8)
-
-    #     # Convert the thresholded image (binary) back to QImage
-    #     thresholded_qimage = QImage(thresholded.data, thresholded.shape[1], thresholded.shape[0], QImage.Format_Grayscale8)
-
-    #     # Convert QImage to QPixmap for display
-    #     pixmap_8bit = QPixmap.fromImage(thresholded_qimage)
-
-    #     # Set the QPixmap to a QLabel or other widget for display
-    #     self.display_image(pixmap_8bit)
-
-    #     # Optionally, save the thresholded image
-    #     # self.save_thresholded_image(thresholded)  # Uncomment if saving is needed
-
-
-
-    #     QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
-
-
-    # def process_image(self):
-    #     if self.pixmap is None:
-    #         QMessageBox.information(None, "Error", "No image loaded")
-    #         return
-
-    #     # Convert QPixmap to QImage
-    #     qimage = self.pixmap.toImage()
-
-    #     # Convert QImage to numpy array
-    #     width = qimage.width()
-    #     height = qimage.height()
-    #     channels = 4  # Assuming RGBA format
-    #     ptr = qimage.bits()
-    #     arr = np.array(ptr).reshape(height, width, channels)
-
-    #     # Convert to grayscale if needed (use only the RGB channels if the image is RGBA)
-    #     if arr.shape[2] == 4:
-    #         arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
-
-    #     # Normalize to 8-bit (values from 0 to 255) if necessary
-    #     arr = np.clip(arr, 0, 255).astype(np.uint8)
-
-    #     # Prompt the user for the lower and upper threshold values
-
-    #     imp = self.ij.py.to_java(arr)
-    #     self.ij.ui().show(imp)
-    #     self.ij.py.run_macro("run('Threshold...');")
-    #     # Step 1: Convert to Binary (Make Binary)
-    #     self.ij.py.run_macro("run('Make Binary');")
-
-    #     # Step 2: Apply Watershed
-    #     self.ij.py.run_macro("run('Watershed');")
-
-    #     # Step 3: Analyze Particles (Size 50-50000, Circularity 0.7-1.00)
-    #     self.ij.py.run_macro("run('Analyze Particles...', 'size=50-50000 circularity=0.7-1.00 show=[Outlines]');")
-
-    #     results_table = self.ij.table()
-    #     particle_count = results_table.size()
-    #     # Wait for the user to finish
-    #     QMessageBox.information(None, "Bacteria Count", f"Number of bacteria detected: {particle_count}")
-    #     self.ij.window().clear()
-
-
-
 
 
     def capture_ellipse_area(self):
