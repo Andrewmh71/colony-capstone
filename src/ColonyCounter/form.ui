@@ -17,10 +17,10 @@
    <widget class="QPushButton" name="uploadButton">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>150</x>
       <y>610</y>
-      <width>531</width>
-      <height>91</height>
+      <width>300</width>
+      <height>80</height>
      </rect>
     </property>
     <property name="font">
@@ -79,6 +79,19 @@
     </property>
     <property name="text">
      <string>Save</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="nextButton">
+    <property name="geometry">
+      <rect>
+      <x>150</x>
+      <y>610</y>
+      <width>300</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Next</string>
     </property>
    </widget>
   </widget>

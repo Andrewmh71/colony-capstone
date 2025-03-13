@@ -110,6 +110,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ij = imagej.init('sc.fiji:fiji', headless=False)
+        self.current_image_index = 0
 
 
         # Create an instance of ImageGraphicsView without adding it to a layout
@@ -131,12 +132,15 @@ class MainWindow(QMainWindow):
         # Connect the analyze button to process the image
         self.ui.analyzeButton.clicked.connect(self.process_image)
 
+
         # Connect the crop button to enable ellipse drawing
         self.ui.cropButton.clicked.connect(self.enable_ellipse_drawing)
 
         # Connect the save button to save the cropped image
         self.ui.saveButton.clicked.connect(self.save_cropped_image)
 
+        # Connect the next button to move to the next image
+        self.ui.nextButton.clicked.connect(self.next_image)
 
 
         self.pixmap = None
@@ -147,30 +151,71 @@ class MainWindow(QMainWindow):
         self.drawing_enabled = False
 
     pillow_heif.register_heif_opener()
+    
     def open_image_dialog(self):
-    # Show file dialog with image filter (including HEIC)
-        file_path, _ = QFileDialog.getOpenFileName(
+        # Show file dialog with image filter (including HEIC) for multiple files
+        file_paths, _ = QFileDialog.getOpenFileNames(
             self,
-            "Open Image",
+            "Open Images",
             "",
             "Images (*.png *.jpg *.jpeg *.bmp *.gif *.heic)"
         )
+        
+        if file_paths:
+            self.file_paths = file_paths  # Store selected file paths
+            self.current_image_index = 0  # Set initial index to 0
+            print(f"Loaded {len(self.file_paths)} images.")  # Debug: Check number of images
+            self.process_batch()  # Process the first image
 
-        if file_path:
-            # Load the image using Pillow (with pillow-heif support)
-            image = Image.open(file_path)
 
-            # Convert the image to QPixmap to display in the QGraphicsView
-            image = image.convert("RGB")  # Ensure it's in RGB mode
-            data = image.tobytes("raw", "RGB")  # Convert to raw byte data
-            qim = QImage(data, image.width, image.height, image.width * 3, QImage.Format_RGB888)
+    def process_batch(self):
+        """Loads and displays the current image from the file paths stored in self.file_paths"""
+        if not self.file_paths:  # Check if there are no files
+            print("No images to process.")  # Debug: No files loaded
+            return  # Exit early if there are no file paths to process
+        
+        # Get the current image path based on the current index
+        current_image_path = self.file_paths[self.current_image_index]
+        print(f"Processing {current_image_path}")  # Debug: Check which image is being processed
+        
+        # Load the image using Pillow (with pillow-heif support)
+        image = Image.open(current_image_path)
+        
+        # Convert the image to QPixmap to display in the QGraphicsView
+        image = image.convert("RGB")  # Ensure it's in RGB mode
+        data = image.tobytes("raw", "RGB")  # Convert to raw byte data
+        qim = QImage(data, image.width, image.height, image.width * 3, QImage.Format_RGB888)
 
-            # Convert QImage to QPixmap
-            pixmap = QPixmap.fromImage(qim)
+        # Convert QImage to QPixmap
+        pixmap = QPixmap.fromImage(qim)
 
-            # Display the image in the QGraphicsView
-            self.file_path = file_path
-            self.display_image(pixmap)
+        if pixmap.isNull():
+            print("Failed to load image!")  # Debug: Image not loaded properly
+            return
+        
+        # Clear any existing items in the scene
+        self.scene.clear()
+
+        # Create a QGraphicsPixmapItem with the selected image and add it to the scene
+        self.image_item = QGraphicsPixmapItem(pixmap)
+        self.scene.addItem(self.image_item)
+
+        # Fit the image to the QGraphicsView initially
+        self.image_container.fitInView(self.image_item, Qt.KeepAspectRatio)
+
+        # Store the pixmap for potential future use
+        self.pixmap = pixmap
+
+
+    def next_image(self):
+        """Displays the next image in the file path list."""
+        if self.current_image_index < len(self.file_paths) - 1:
+            self.current_image_index += 1  # Move to the next image
+            print(f"Moving to next image. Index: {self.current_image_index}")  # Debug: Check index
+            self.process_batch()  # Process and display the next image
+        else:
+            print("All images processed!")  # Debug: End of list
+
 
     def enable_ellipse_drawing(self):
         if self.image_item:
@@ -274,10 +319,6 @@ class MainWindow(QMainWindow):
 
     #   # # # Clear the ImageJ window
     #   # #   self.ij.window().clear()
-
-
-
-
 
 
 
@@ -477,7 +518,8 @@ class MainWindow(QMainWindow):
 
       # # # Clear the ImageJ window
       # #   self.ij.window().clear()
-
+    
+    
 
 
 
