@@ -13,6 +13,9 @@ from sklearn.cluster import DBSCAN
 import imageio
 from PIL import Image
 import pillow_heif
+import imageio
+from PIL import Image
+import pillow_heif
 from scipy import ndimage as ndi
 from skimage.feature import peak_local_max
 from skimage.segmentation import watershed
@@ -22,86 +25,6 @@ import scyjava
 from scyjava import jimport
 import matplotlib.pyplot as plt
 
-
-
-
-
-class ResizeHandle(QGraphicsRectItem):
-    def __init__(self, parent=None, position=None):
-        super().__init__(-5, -5, 10, 10, parent)
-        self.setBrush(Qt.black)
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)  # Allow direct moving
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
-        self.setCursor(Qt.SizeFDiagCursor)
-        self.position = position  # Position can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
-        self.resizing = False
-
-    def mousePressEvent(self, event: QMouseEvent):
-        self.resizing = True
-        self.setCursor(Qt.SizeFDiagCursor)
-        self.initial_pos = event.scenePos()
-        self.initial_rect = self.parentItem().rect()
-        super().mousePressEvent(event)
-
-    def mouseReleaseEvent(self, event: QMouseEvent):
-        self.resizing = False
-        self.setCursor(Qt.SizeFDiagCursor)
-        super().mouseReleaseEvent(event)
-
-    def mouseMoveEvent(self, event: QMouseEvent):
-        if self.resizing:
-            parent = self.parentItem()
-            rect = parent.rect()
-
-            delta = event.scenePos() - self.initial_pos
-            if self.position == 'topLeft':
-                rect.setTopLeft(self.initial_rect.topLeft() + delta)
-            elif self.position == 'topRight':
-                rect.setTopRight(self.initial_rect.topRight() + delta)
-            elif self.position == 'bottomLeft':
-                rect.setBottomLeft(self.initial_rect.bottomLeft() + delta)
-            elif self.position == 'bottomRight':
-                rect.setBottomRight(self.initial_rect.bottomRight() + delta)
-
-            # Apply the new rect to the ellipse
-            parent.prepareGeometryChange()
-            parent.setRect(rect)
-            parent.update_handles()
-
-        super().mouseMoveEvent(event)
-
-class EllipseItem(QGraphicsEllipseItem):
-    def __init__(self, rect, parent=None):
-        super().__init__(rect, parent)
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
-        self.setPen(QPen(Qt.red, 2))
-
-
-        self.handles = {
-                    'topLeft': ResizeHandle(self, 'topLeft'),
-                    'topRight': ResizeHandle(self, 'topRight'),
-                    'bottomLeft': ResizeHandle(self, 'bottomLeft'),
-                    'bottomRight': ResizeHandle(self, 'bottomRight')
-                }
-        self.update_handles()
-
-    def update_handles(self):
-        rect = self.rect()
-        self.handles['topLeft'].setPos(rect.topLeft())
-        self.handles['topRight'].setPos(rect.topRight())
-        self.handles['bottomLeft'].setPos(rect.bottomLeft())
-        self.handles['bottomRight'].setPos(rect.bottomRight())
-
-    def mouseMoveEvent(self, event):
-        super().mouseMoveEvent(event)
-        self.update_handles()
-
-    def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemPositionChange:
-            self.update_handles()
-        return super().itemChange(change, value)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -134,10 +57,12 @@ class MainWindow(QMainWindow):
 
 
         # Connect the crop button to enable ellipse drawing
-        self.ui.cropButton.clicked.connect(self.enable_ellipse_drawing)
 
         # Connect the save button to save the cropped image
-        self.ui.saveButton.clicked.connect(self.save_cropped_image)
+
+        self.ui.addBacteriaButton.clicked.connect(self.add_colonies)
+
+        self.ui.nextButton.clicked.connect(self.next_image)
 
         # Connect the next button to move to the next image
         self.ui.nextButton.clicked.connect(self.next_image)
@@ -150,8 +75,6 @@ class MainWindow(QMainWindow):
         self.image_item = None
         self.drawing_enabled = False
 
-    pillow_heif.register_heif_opener()
-    
     def open_image_dialog(self):
         # Show file dialog with image filter (including HEIC) for multiple files
         file_paths, _ = QFileDialog.getOpenFileNames(
@@ -160,62 +83,12 @@ class MainWindow(QMainWindow):
             "",
             "Images (*.png *.jpg *.jpeg *.bmp *.gif *.heic)"
         )
-        
-        if file_paths:
-            self.file_paths = file_paths  # Store selected file paths
-            self.current_image_index = 0  # Set initial index to 0
-            print(f"Loaded {len(self.file_paths)} images.")  # Debug: Check number of images
-            self.process_batch()  # Process the first image
 
-
-    def process_batch(self):
-        """Loads and displays the current image from the file paths stored in self.file_paths"""
-        if not self.file_paths:  # Check if there are no files
-            print("No images to process.")  # Debug: No files loaded
-            return  # Exit early if there are no file paths to process
-        
-        # Get the current image path based on the current index
-        current_image_path = self.file_paths[self.current_image_index]
-        print(f"Processing {current_image_path}")  # Debug: Check which image is being processed
-        
-        # Load the image using Pillow (with pillow-heif support)
-        image = Image.open(current_image_path)
-        
-        # Convert the image to QPixmap to display in the QGraphicsView
-        image = image.convert("RGB")  # Ensure it's in RGB mode
-        data = image.tobytes("raw", "RGB")  # Convert to raw byte data
-        qim = QImage(data, image.width, image.height, image.width * 3, QImage.Format_RGB888)
-
-        # Convert QImage to QPixmap
-        pixmap = QPixmap.fromImage(qim)
-
-        if pixmap.isNull():
-            print("Failed to load image!")  # Debug: Image not loaded properly
-            return
-        
-        # Clear any existing items in the scene
-        self.scene.clear()
-
-        # Create a QGraphicsPixmapItem with the selected image and add it to the scene
-        self.image_item = QGraphicsPixmapItem(pixmap)
-        self.scene.addItem(self.image_item)
-
-        # Fit the image to the QGraphicsView initially
-        self.image_container.fitInView(self.image_item, Qt.KeepAspectRatio)
-
-        # Store the pixmap for potential future use
-        self.pixmap = pixmap
-
-
-    def next_image(self):
-        """Displays the next image in the file path list."""
-        if self.current_image_index < len(self.file_paths) - 1:
-            self.current_image_index += 1  # Move to the next image
-            print(f"Moving to next image. Index: {self.current_image_index}")  # Debug: Check index
-            self.process_batch()  # Process and display the next image
-        else:
-            print("All images processed!")  # Debug: End of list
-
+        if file_path:
+            # Load the image and display it in the QGraphicsView
+            self.file_path = file_path
+            pixmap = QPixmap(file_path)
+            self.display_image(pixmap)
 
     def enable_ellipse_drawing(self):
         if self.image_item:
@@ -322,6 +195,10 @@ class MainWindow(QMainWindow):
 
 
 
+
+
+
+
     def process_image(self):
         if self.pixmap is None:
             QMessageBox.information(None, "Error", "No image loaded")
@@ -358,7 +235,7 @@ class MainWindow(QMainWindow):
             # Convert resized image to grayscale
             gray_resized = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
 
-            # Step 3: Detect circles in the resized image
+
             circles_resized = cv2.HoughCircles(
                 gray_resized,
                 cv2.HOUGH_GRADIENT,
@@ -370,7 +247,7 @@ class MainWindow(QMainWindow):
                 maxRadius=100
             )
 
-            # Step 4: If circles are detected, find the most centered circle
+      # If circles are detected, find the most centered circle
             if circles_resized is not None:
                 circles_resized = np.round(circles_resized[0, :]).astype("int")
 
@@ -419,8 +296,6 @@ class MainWindow(QMainWindow):
                     cropped_image = result[y1:y2, x1:x2]
 
                     # Step 8: Display the cropped result
-                    plt.imshow(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
-                    plt.show()
 
                 else:
                     print("No circles detected.")
@@ -464,7 +339,6 @@ class MainWindow(QMainWindow):
         # # Convert back to ImagePlus (Java object)
         # imp = self.ij.py.to_java(thresholded_image)
 
-        # self.ij.ui().show(imp)
 
 
         # Access and modify a preference (for example, black background setting)
@@ -495,17 +369,23 @@ class MainWindow(QMainWindow):
       #   # self.ij.ui().show(imp)
       #   # self.ij.py.run_macro("run('8-bit');",)
         # self.ij.py.run_macro("run('Fill Holes', '');",)
-        self.ij.py.run_macro("run('Watershed');",)
+        # self.ij.py.run_macro("run('Watershed');",)
         # self.ij.py.run_macro("run('Remove Outliers...', 'radius=2 threshold=50 which=Bright');",)
       #   # self.ij.py.run_macro("run('Watershed');",)  # Apply watershed
       #   # self.ij.py.run_macro("run('Remove Outliers...', 'radius=15 threshold=50 which=Bright');",)
-        self.ij.py.run_macro("run('Remove Outliers...', 'radius=3 threshold=50 which=Bright');",)
+        self.ij.py.run_macro("run('Remove Outliers...', 'radius=2 threshold=50 which=Bright');",)
         for i in range(2):
             self.ij.py.run_macro("run('Despeckle');",)
+
       # # Analyze particles with specific settings
         # self.ij.py.run_macro("run('Gaussian Blur...', 'sigma=2');",)
 
-        self.ij.py.run_macro("run('Analyze Particles...', 'size=50-50000 circularity=0.65-1.00 show=Outlines display exclude summarize');",)
+        # self.ij.py.run_macro("run('Analyze Particles...', 'size=50-50000 circularity=0.65-1.00 show=Outlines display exclude summarize overlay');",)
+        self.ij.py.run_macro("run('Watershed');",)
+        self.ij.py.run_macro("run('Analyze Particles...', 'size=70-50000 circularity=0.70-1.00 display exclude summarize overlay');",)
+
+        self.ij.py.run_macro("setTool('freehand');",)
+        self.ij.ui().show(imp)
 
       # # # Optionally, you can save the result if needed
       # # # self.ij.io().save(imp, 'path_to_save_result')  # Uncomment to save
@@ -518,8 +398,7 @@ class MainWindow(QMainWindow):
 
       # # # Clear the ImageJ window
       # #   self.ij.window().clear()
-    
-    
+
 
 
 

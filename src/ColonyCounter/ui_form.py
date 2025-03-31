@@ -11,14 +11,12 @@
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
-    QCursor, QFont, QFontDatabase, QGradient,
-    QIcon, QImage, QKeySequence, QLinearGradient,
-    QPainter, QPalette, QPixmap, QRadialGradient,
-    QTransform)
-from PySide6.QtWidgets import (QApplication, QGraphicsView, QMainWindow, QMenu,
-    QMenuBar, QPushButton, QSizePolicy, QStatusBar,
-    QWidget)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QGraphicsView, QMainWindow, QPushButton,
+    QSizePolicy, QStatusBar, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -29,34 +27,26 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.uploadButton = QPushButton(self.centralwidget)
         self.uploadButton.setObjectName(u"uploadButton")
-        self.uploadButton.setGeometry(QRect(250, 610, 531, 91))
+        self.uploadButton.setGeometry(QRect(190, 570, 531, 91))
         font = QFont()
         font.setPointSize(18)
         self.uploadButton.setFont(font)
         self.imageContainer = QGraphicsView(self.centralwidget)
         self.imageContainer.setObjectName(u"imageContainer")
         self.imageContainer.setGeometry(QRect(70, 60, 791, 471))
-        self.cropButton = QPushButton(self.centralwidget)
-        self.cropButton.setObjectName(u"cropButton")
-        self.cropButton.setGeometry(QRect(760, 0, 80, 24))
         self.analyzeButton = QPushButton(self.centralwidget)
         self.analyzeButton.setObjectName(u"analyzeButton")
-        self.analyzeButton.setGeometry(QRect(670, 0, 80, 24))
-        self.saveButton = QPushButton(self.centralwidget)
-        self.saveButton.setObjectName(u"saveButton")
-        self.saveButton.setGeometry(QRect(590, 0, 80, 24))
+        self.analyzeButton.setGeometry(QRect(770, 30, 91, 31))
+        self.addBacteriaButton = QPushButton(self.centralwidget)
+        self.addBacteriaButton.setObjectName(u"addBacteriaButton")
+        self.addBacteriaButton.setGeometry(QRect(690, 30, 81, 31))
+        self.nextButton = QPushButton(self.centralwidget)
+        self.nextButton.setObjectName(u"nextButton")
+        self.nextButton.setGeometry(QRect(890, 270, 300, 80))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        self.menubar = QMenuBar(MainWindow)
-        self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1282, 21))
-        self.menuFile = QMenu(self.menubar)
-        self.menuFile.setObjectName(u"menuFile")
-        MainWindow.setMenuBar(self.menubar)
-
-        self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
 
@@ -66,9 +56,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.uploadButton.setText(QCoreApplication.translate("MainWindow", u"Upload Image", None))
-        self.cropButton.setText(QCoreApplication.translate("MainWindow", u"Crop", None))
         self.analyzeButton.setText(QCoreApplication.translate("MainWindow", u"Analyze", None))
-        self.saveButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))
-        self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
+        self.addBacteriaButton.setText(QCoreApplication.translate("MainWindow", u"Add Particles", None))
+        self.nextButton.setText(QCoreApplication.translate("MainWindow", u"Next", None))
     # retranslateUi
 
