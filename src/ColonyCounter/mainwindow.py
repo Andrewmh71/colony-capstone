@@ -13,9 +13,6 @@ from sklearn.cluster import DBSCAN
 import imageio
 from PIL import Image
 import pillow_heif
-import imageio
-from PIL import Image
-import pillow_heif
 from scipy import ndimage as ndi
 from skimage.feature import peak_local_max
 from skimage.segmentation import watershed
@@ -33,7 +30,6 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ij = imagej.init('sc.fiji:fiji', headless=False)
-        self.current_image_index = 0
 
 
         # Create an instance of ImageGraphicsView without adding it to a layout
@@ -55,7 +51,6 @@ class MainWindow(QMainWindow):
         # Connect the analyze button to process the image
         self.ui.analyzeButton.clicked.connect(self.process_image)
 
-
         # Connect the crop button to enable ellipse drawing
 
         # Connect the save button to save the cropped image
@@ -64,8 +59,6 @@ class MainWindow(QMainWindow):
 
         self.ui.nextButton.clicked.connect(self.next_image)
 
-        # Connect the next button to move to the next image
-        self.ui.nextButton.clicked.connect(self.next_image)
 
 
         self.pixmap = None
@@ -75,6 +68,7 @@ class MainWindow(QMainWindow):
         self.image_item = None
         self.drawing_enabled = False
 
+    pillow_heif.register_heif_opener()
     def open_image_dialog(self):
         # Show file dialog with image filter (including HEIC) for multiple files
         file_paths, _ = QFileDialog.getOpenFileNames(
@@ -84,12 +78,61 @@ class MainWindow(QMainWindow):
             "Images (*.png *.jpg *.jpeg *.bmp *.gif *.heic)"
         )
 
-        if file_path:
-            # Load the image and display it in the QGraphicsView
-            self.file_path = file_path
-            pixmap = QPixmap(file_path)
-            self.display_image(pixmap)
+        if file_paths:
+            self.file_paths = file_paths  # Store selected file paths
+            self.current_image_index = 0  # Set initial index to 0
+            print(f"Loaded {len(self.file_paths)} images.")  # Debug: Check number of images
+            self.process_batch()  # Process the first image
 
+
+
+    def process_batch(self):
+        """Loads and displays the current image from the file paths stored in self.file_paths"""
+        if not self.file_paths:  # Check if there are no files
+            print("No images to process.")  # Debug: No files loaded
+            return  # Exit early if there are no file paths to process
+
+        # Get the current image path based on the current index
+        current_image_path = self.file_paths[self.current_image_index]
+        print(f"Processing {current_image_path}")  # Debug: Check which image is being processed
+
+        # Load the image using Pillow (with pillow-heif support)
+        image = Image.open(current_image_path)
+
+        # Convert the image to QPixmap to display in the QGraphicsView
+        image = image.convert("RGB")  # Ensure it's in RGB mode
+        data = image.tobytes("raw", "RGB")  # Convert to raw byte data
+        qim = QImage(data, image.width, image.height, image.width * 3, QImage.Format_RGB888)
+
+        # Convert QImage to QPixmap
+        pixmap = QPixmap.fromImage(qim)
+
+        if pixmap.isNull():
+            print("Failed to load image!")  # Debug: Image not loaded properly
+            return
+
+        # Clear any existing items in the scene
+        self.scene.clear()
+
+        # Create a QGraphicsPixmapItem with the selected image and add it to the scene
+        self.image_item = QGraphicsPixmapItem(pixmap)
+        self.scene.addItem(self.image_item)
+
+        # Fit the image to the QGraphicsView initially
+        self.image_container.fitInView(self.image_item, Qt.KeepAspectRatio)
+
+        # Store the pixmap for potential future use
+        self.pixmap = pixmap
+
+
+    def next_image(self):
+        """Displays the next image in the file path list."""
+        if self.current_image_index < len(self.file_paths) - 1:
+            self.current_image_index += 1  # Move to the next image
+            print(f"Moving to next image. Index: {self.current_image_index}")  # Debug: Check index
+            self.process_batch()  # Process and display the next image
+        else:
+            print("All images processed!")  # Debug: End of list
     def enable_ellipse_drawing(self):
         if self.image_item:
             self.drawing_enabled = True
@@ -111,88 +154,60 @@ class MainWindow(QMainWindow):
         # Store the pixmap
         self.pixmap = pixmap
 
+    def add_colonies(self):
 
 
+        macro = """
+        roiCount = roiManager("count");
+        if (roiCount > 0) {
+            roiManager("Deselect");
+            roiManager("Delete");
+        }
+
+        run("Add to Manager");
+
+        if (!isOpen("ROI Manager")) {
+            run("ROI Manager...");
+        }
 
 
+        roiManager("Select", 0);
 
+        // Debug: Print selection type
+        isComposite = (selectionType() == 9); // Check for composite selection
 
+        if (isComposite) {
+            roiManager("Split");
+            wait(200); // Give time for processing
+        }
 
+        // Get the updated ROI count
+        roiCountAfter = roiManager("count");
 
+        if (!isComposite || roiCountAfter == 1) {
+            // Process single ROI directly
+            roiManager("Select", 0);
+            roiManager("Measure");
+            run("Add Selection...");
+            roiManager("Delete");
+        } else {
+            // Remove original composite ROI
+            roiManager("Select", 0);
+            roiManager("Delete");
 
+            roiCountAfter = roiManager("count"); // Update count
 
+            // Process each split ROI
+            for (i = roiCountAfter - 1; i >= 0; i--) {
+                roiManager("Select", i);
+                roiManager("Measure");
+                run("Add Selection...");
+                roiManager("Delete");
+            }
+        }
+        """
 
-    # def process_image(self):
-    #     if self.pixmap is None:
-    #         QMessageBox.information(None, "Error", "No image loaded")
-    #         return
-
-    #     # Convert QPixmap to QImage
-    #     qimage = self.pixmap.toImage()
-
-    #     # Convert QImage to numpy array
-    #     width = qimage.width()
-    #     height = qimage.height()
-    #     channels = 4  # Assuming RGBA format
-    #     ptr = qimage.bits()
-    #     arr = np.array(ptr).reshape(height, width, channels)
-    #     if arr.shape[2] == 4:
-    #         arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
-    #     arr = np.clip(arr, 0, 255).astype(np.uint8)
-    #     # Convert numpy array to ImagePlus object
-    #     imp = self.ij.py.to_java(arr)
-    #   # Show the image in ImageJ
-    #     self.ij.ui().show(imp)
-
-    #   # Run commands in ImageJ
-    #     self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit
-
-    #     # self.ij.ui().show(imp)
-
-
-    #     # image_to_thresh = self.ij.py.from_java(imp)
-    #     # image_to_thresh = np.array(image_to_thresh)
-
-    #     # # Apply an inverted simple threshold
-    #     # thresh_value = 170  # The threshold value
-    #     # max_value = 255  # Max value for the thresholded pixels (white)
-
-    #     # # Invert the threshold operation (black becomes white, white becomes black)
-    #     # retval, thresholded_image = cv2.threshold(image_to_thresh, thresh_value, max_value, cv2.THRESH_BINARY_INV)
-
-    #     # # Convert back to ImagePlus (Java object)
-    #     # imp = self.ij.py.to_java(thresholded_image)
-
-    #     # self.ij.ui().show(imp)
-    #   #   self.ij.py.run_macro("run('Threshold...');",)
-    #   #   lower_threshold, ok1 = QInputDialog.getInt(None, "Enter Lower Threshold", "Lower Threshold:", 0, 0, 255, 1)
-
-
-    #   #   self.ij.ui().show(imp)
-    #     self.ij.py.run_macro("run('Convert to Mask');",)
-    #     self.ij.py.run_macro("run('Fill Holes', '');",)
-
-    #     self.ij.py.run_macro("run('Watershed');",)  # Apply watershed
-    #     self.ij.py.run_macro("run('Remove Outliers...', 'radius=10 threshold=50 which=Bright');",)
-    #     for i in range(50):
-    #         self.ij.py.run_macro("run('Despeckle');",)
-    #   # # Analyze particles with specific settings
-    #     # self.ij.py.run_macro("run('Gaussian Blur...', 'sigma=2');",)
-
-    #     self.ij.py.run_macro("run('Analyze Particles...', 'size=200-50000 circularity=0.35-1.00 show=Outlines display exclude summarize');",)
-
-    #   # # # Optionally, you can save the result if needed
-    #   # # # self.ij.io().save(imp, 'path_to_save_result')  # Uncomment to save
-
-    #   # # # Close ImageJ after processing (optional)
-    #   # #   self.ij.dispose()
-
-    #   # # # Show success message
-    #   # #   QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
-
-    #   # # # Clear the ImageJ window
-    #   # #   self.ij.window().clear()
-
+        self.ij.py.run_macro(macro)
 
 
 
@@ -398,160 +413,6 @@ class MainWindow(QMainWindow):
 
       # # # Clear the ImageJ window
       # #   self.ij.window().clear()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # def process_image(self):
-    #     if self.pixmap is None:
-    #         QMessageBox.information(None, "Error", "No image loaded")
-    #         return
-
-    #     # Convert QPixmap to QImage
-    #     qimage = self.pixmap.toImage()
-
-    #     # Convert QImage to numpy array
-    #     width = qimage.width()
-    #     height = qimage.height()
-    #     channels = 4  # Assuming RGBA format
-    #     ptr = qimage.bits()
-    #     arr = np.array(ptr).reshape(height, width, channels)
-
-    #     # Convert to grayscale if needed (use only the RGB channels if the image is RGBA)
-    #     if arr.shape[2] == 4:
-    #         arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
-
-    #     # Normalize to 8-bit (values from 0 to 255) if necessary
-    #     arr = np.clip(arr, 0, 255).astype(np.uint8)
-
-    #     imp = self.ij.py.to_java(arr)
-    #     self.ij.ui().show(imp)
-    #     self.ij.py.run_macro("run('Threshold...');")
-    #     # Prompt the user for the lower and upper threshold values
-    #     lower_threshold, ok1 = QInputDialog.getInt(None, "Enter Lower Threshold", "Lower Threshold:", 0, 0, 255, 1)
-    #     upper_threshold, ok2 = QInputDialog.getInt(None, "Enter Upper Threshold", "Upper Threshold:", 255, 0, 255, 1)
-
-    #     if not ok1 or not ok2:
-    #         return  # If the user cancelled the input dialogs
-
-    #     # Apply the threshold manually (binary mask creation)
-    #     thresholded = np.where((arr >= lower_threshold) & (arr <= upper_threshold), 255, 0)
-
-    #     # Ensure the thresholded image is of correct uint8 type for display
-    #     thresholded = thresholded.astype(np.uint8)
-
-    #     # Convert the thresholded image (binary) back to QImage
-    #     thresholded_qimage = QImage(thresholded.data, thresholded.shape[1], thresholded.shape[0], QImage.Format_Grayscale8)
-
-    #     # Convert QImage to QPixmap for display
-    #     pixmap_8bit = QPixmap.fromImage(thresholded_qimage)
-
-    #     # Set the QPixmap to a QLabel or other widget for display
-    #     self.display_image(pixmap_8bit)
-
-    #     # Optionally, save the thresholded image
-    #     # self.save_thresholded_image(thresholded)  # Uncomment if saving is needed
-
-
-
-    #     QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
-
-
-    # def process_image(self):
-    #     if self.pixmap is None:
-    #         QMessageBox.information(None, "Error", "No image loaded")
-    #         return
-
-    #     # Convert QPixmap to QImage
-    #     qimage = self.pixmap.toImage()
-
-    #     # Convert QImage to numpy array
-    #     width = qimage.width()
-    #     height = qimage.height()
-    #     channels = 4  # Assuming RGBA format
-    #     ptr = qimage.bits()
-    #     arr = np.array(ptr).reshape(height, width, channels)
-
-    #     # Convert to grayscale if needed (use only the RGB channels if the image is RGBA)
-    #     if arr.shape[2] == 4:
-    #         arr = arr[:, :, :3].dot([0.299, 0.587, 0.114])  # Convert to grayscale
-
-    #     # Normalize to 8-bit (values from 0 to 255) if necessary
-    #     arr = np.clip(arr, 0, 255).astype(np.uint8)
-
-    #     # Prompt the user for the lower and upper threshold values
-
-    #     imp = self.ij.py.to_java(arr)
-    #     self.ij.ui().show(imp)
-    #     self.ij.py.run_macro("run('Threshold...');")
-    #     # Step 1: Convert to Binary (Make Binary)
-    #     self.ij.py.run_macro("run('Make Binary');")
-
-    #     # Step 2: Apply Watershed
-    #     self.ij.py.run_macro("run('Watershed');")
-
-    #     # Step 3: Analyze Particles (Size 50-50000, Circularity 0.7-1.00)
-    #     self.ij.py.run_macro("run('Analyze Particles...', 'size=50-50000 circularity=0.7-1.00 show=[Outlines]');")
-
-    #     results_table = self.ij.table()
-    #     particle_count = results_table.size()
-    #     # Wait for the user to finish
-    #     QMessageBox.information(None, "Bacteria Count", f"Number of bacteria detected: {particle_count}")
-    #     self.ij.window().clear()
-
-
-
-
-
-    def capture_ellipse_area(self):
-        if self.pixmap is None or self.ellipse_item is None:
-            QMessageBox.information(self, "Error", "No image or ellipse defined")
-            return None
-
-            # Convert QPixmap to QImage
-        q_image = self.pixmap.toImage()
-
-            # Get the ellipse's geometry in scene coordinates
-        rect = self.ellipse_item.mapRectToScene(self.ellipse_item.rect())
-        center = (int(rect.center().x()), int(rect.center().y()))
-        radius_x = int(rect.width() / 2)
-        radius_y = int(rect.height() / 2)
-
-            # Create an elliptical mask using QPainterPath
-        path = QPainterPath()
-        path.addEllipse(center[0] - radius_x, center[1] - radius_y, 2 * radius_x, 2 * radius_y)
-
-            # Apply the mask to the image
-        result = QImage(q_image.size(), QImage.Format_ARGB32)
-        result.fill(Qt.transparent)
-
-        painter = QPainter(result)
-        painter.setClipPath(path)
-        painter.drawImage(0, 0, q_image)
-        painter.end()
-
-        return result
-
-    def save_cropped_image(self):
-        cropped_image = self.capture_ellipse_area()
-        if cropped_image is None:
-            return
-
-        # Save the QImage to a file
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "Images (*.png *.jpg *.jpeg *.bmp *.gif)")
-        if file_path:
-            cropped_image.save(file_path)
-            QMessageBox.information(self, "Success", f"Image saved to {file_path}")
 
 
 if __name__ == "__main__":

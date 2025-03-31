@@ -60,4 +60,3 @@ class Ui_MainWindow(object):
         self.addBacteriaButton.setText(QCoreApplication.translate("MainWindow", u"Add Particles", None))
         self.nextButton.setText(QCoreApplication.translate("MainWindow", u"Next", None))
     # retranslateUi
-
