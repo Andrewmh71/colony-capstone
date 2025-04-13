@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1282</width>
+    <width>1748</width>
     <height>826</height>
    </rect>
   </property>
@@ -14,24 +14,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="uploadButton">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>570</y>
-      <width>531</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>18</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Upload Image</string>
-    </property>
-   </widget>
    <widget class="QGraphicsView" name="imageContainer">
     <property name="geometry">
      <rect>
@@ -45,10 +27,10 @@
    <widget class="QPushButton" name="analyzeButton">
     <property name="geometry">
      <rect>
-      <x>770</x>
-      <y>30</y>
-      <width>91</width>
-      <height>31</height>
+      <x>280</x>
+      <y>560</y>
+      <width>321</width>
+      <height>91</height>
      </rect>
     </property>
     <property name="text">
@@ -58,27 +40,76 @@
    <widget class="QPushButton" name="addBacteriaButton">
     <property name="geometry">
      <rect>
-      <x>690</x>
+      <x>290</x>
+      <y>30</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Update Changes</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="saveImageButton">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
       <y>30</y>
       <width>81</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Add Particles</string>
+     <string>Save</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="nextButton">
+   <widget class="QPushButton" name="loadImageButton">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>270</y>
-      <width>300</width>
-      <height>80</height>
+      <x>210</x>
+      <y>30</y>
+      <width>81</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Next</string>
+     <string>Load Save</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="addFolderButton">
+    <property name="geometry">
+     <rect>
+      <x>970</x>
+      <y>30</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add Images to Workspce</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="thumbnailWidget">
+    <property name="geometry">
+     <rect>
+      <x>970</x>
+      <y>60</y>
+      <width>621</width>
+      <height>461</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DeleteButton">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>30</y>
+      <width>61</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delete</string>
     </property>
    </widget>
   </widget>

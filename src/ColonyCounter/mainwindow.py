@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QMessageBox, QGraphicsEllipseItem, QGraphicsItem, QGraphicsRectItem, QSlider, QInputDialog
-from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath
-from PySide6.QtCore import Qt, QRectF
+from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath, QIcon
+import time
+from PySide6.QtCore import Qt, QRectF, QSize
 from ui_form import Ui_MainWindow
 from customGraphicsView import ImageGraphicsView
 import sys
@@ -21,15 +22,211 @@ from skimage.morphology import label
 import scyjava
 from scyjava import jimport
 import matplotlib.pyplot as plt
+import shutil
+import hashlib
+from PySide6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
+import psutil
+
+
+pillow_heif.register_heif_opener()
+
+
+class ImageUploader(QMainWindow):
+    def __init__(self, app_folder="app_images"):
+        super().__init__()
+
+        self.app_folder = app_folder
+        self.saved_hashes = {}  # Dictionary to store hashes of saved images with the corresponding file path
+
+        # Load existing hashes from the folder if any
+        self._load_existing_hashes()
+
+        if not os.path.exists(self.app_folder):
+            os.makedirs(self.app_folder)
+
+        # Set up the main window layout
+        self.setWindowTitle("Image Uploader")
+        self.setGeometry(100, 100, 800, 600)
+
+        # List Widget to show images
+        self.image_list_widget = QListWidget(self)
+        self.image_list_widget.setGeometry(10, 10, 780, 550)
+        self.image_list_widget.setViewMode(QListWidget.IconMode)
+        self.image_list_widget.setIconSize(QSize(100, 100))
+        self.image_list_widget.setSpacing(10)
+        self.image_list_widget.setDragEnabled(False)  # Disable dragging on the list widget
+        self.image_list_widget.setAcceptDrops(False)  # Also ensure drops are not accepted
+
+        # Load images into the list widget
+        self.load_images_into_widget()
+
+        # Set layout and central widget
+        layout = QVBoxLayout()
+        layout.addWidget(self.image_list_widget)
+        container = QWidget()
+        container.setLayout(layout)
+        self.setCentralWidget(container)
+
+    def get_all_images(self):
+        """Return all saved image paths"""
+        return list(self.saved_hashes.values())
+
+    def _load_existing_hashes(self):
+        """Load the hashes of images already in the app folder"""
+        for image_name in os.listdir(self.app_folder):
+            image_path = os.path.join(self.app_folder, image_name)
+            if os.path.isfile(image_path):
+                image_hash = self._get_image_hash(image_path)
+                self.saved_hashes[image_hash] = image_path  # Store the hash and path
+
+    def _get_image_hash(self, image_path):
+        """Generate a hash for the given image file"""
+        hash_sha256 = hashlib.sha256()
+        with open(image_path, 'rb') as f:
+            while chunk := f.read(8192):  # Read file in chunks
+                hash_sha256.update(chunk)
+        return hash_sha256.hexdigest()
+
+    def upload_images(self):
+        """Upload and save images, skipping duplicates based on hash"""
+        # Open a file dialog to select images
+        file_paths, _ = QFileDialog.getOpenFileNames(None, "Select Images", "", "Images (*.png *.jpg *.jpeg *.bmp *.tiff *.heic)")
+        if not file_paths:
+            return
+
+        saved_images = []
+
+        for image_path in file_paths:
+            try:
+                # Generate the hash of the current image
+                image_hash = self._get_image_hash(image_path)
+
+                # Check if the image hash already exists
+                if image_hash in self.saved_hashes:
+                    existing_image = self.saved_hashes[image_hash]  # Get the existing image path
+                    print(f"Image {os.path.basename(image_path)} is already saved as {os.path.basename(existing_image)}.")
+                    continue  # Skip this image as it is a duplicate based on content
+
+                # Proceed to save the image
+                image_name = os.path.basename(image_path)
+                saved_path = os.path.join(self.app_folder, image_name)
+
+                # Ensure unique name if image already exists (based on name)
+                if os.path.exists(saved_path):
+                    base_name, ext = os.path.splitext(image_name)
+                    counter = 1
+                    while os.path.exists(saved_path):
+                        new_name = f"{base_name}_{counter}{ext}"
+                        saved_path = os.path.join(self.app_folder, new_name)
+                        counter += 1
+
+                shutil.copy(image_path, saved_path)
+                self.saved_hashes[image_hash] = saved_path  # Store the hash and path of the saved image
+                saved_images.append(saved_path)
+
+            except Exception as e:
+                QMessageBox.warning(None, "Error", f"Failed to save image {image_path}: {str(e)}")
+
+        if saved_images:
+            QMessageBox.information(None, "Images Saved", f"Images have been successfully saved to: {self.app_folder}")
+        return saved_images  # List of saved image paths
+
+    def load_images_into_widget(self):
+        """Load the images from the folder into the list widget"""
+        for image_hash, image_path in self.saved_hashes.items():
+            # Create a list item for each image
+            image_name = os.path.basename(image_path)
+            item = QListWidgetItem(image_name)
+
+            # Create a thumbnail for each image
+            pixmap = QPixmap(image_path)
+            if pixmap.isNull():
+                print(f"Failed to load image: {image_path}")
+                continue  # Skip this image if it can't be loaded
+            pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio)  # Scale the pixmap to fit in the list widget
+            item.setIcon(QIcon(pixmap))
+
+            # Add item to the list widget
+            self.image_list_widget.addItem(item)
+
+            # Make the item clickable and associate the image path with it
+            item.setData(Qt.UserRole, image_path)  # Store the path of the image in the item data
+            print(f"Image added to list: {image_name}")  # Debugging print statement
+
+        # Connect the itemClicked signal to the handler after adding the items
+        self.image_list_widget.itemClicked.connect(self.on_image_clicked)
+
+    def on_image_clicked(self, item):
+        """Handle the click on an image item in the list"""
+        image_path = item.data(Qt.UserRole)  # Retrieve the image path from the item data
+        print(f"Clicked on image: {image_path}")  # This should print when you click an image item
+
+        # Call the function to process the clicked image
+        self.process_single_image(image_path)
+
+    def process_single_image(self, image_path):
+        """Process the selected image based on the path"""
+        print(f"Processing {image_path}")  # Debug: Check which image is being processed
+
+        # Load the image using Pillow (with pillow-heif support)
+        image = Image.open(image_path)
+
+        # Convert the image to QPixmap to display in the QGraphicsView
+        image = image.convert("RGB")  # Ensure it's in RGB mode
+        data = image.tobytes("raw", "RGB")  # Convert to raw byte data
+        qim = QImage(data, image.width, image.height, image.width * 3, QImage.Format_RGB888)
+
+        # Convert QImage to QPixmap
+        pixmap = QPixmap.fromImage(qim)
+
+        if pixmap.isNull():
+            print("Failed to load image!")  # Debug: Image not loaded properly
+            return
+
+        # Clear any existing items in the scene
+        self.scene.clear()
+
+        # Create a QGraphicsPixmapItem with the selected image and add it to the scene
+        self.image_item = QGraphicsPixmapItem(pixmap)
+        self.scene.addItem(self.image_item)
+
+        # Fit the image to the QGraphicsView initially
+        self.image_container.fitInView(self.image_item, Qt.KeepAspectRatio)
+
+        # Store the pixmap for potential future use
+        self.pixmap = pixmap
 
 
 class MainWindow(QMainWindow):
+
+
+    def display_thumbnails(self, image_paths):
+           """Displays thumbnails of the images in the QListWidget."""
+           self.ui.thumbnailWidget.clear()
+           for path in image_paths:
+               item = QListWidgetItem()
+               pixmap = QPixmap(path).scaled(100, 100, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+               icon = QIcon(pixmap)
+               item.setIcon(icon)
+               item.setText(os.path.basename(path))
+               item.setSizeHint(QSize(120, 120))  # Add some padding
+               item.setData(Qt.UserRole, path)  # Store the image path as custom data
+               self.ui.thumbnailWidget.addItem(item)
+
+
+
     def __init__(self):
         super().__init__()
         sj.config.add_option('-Xmx1g')
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ij = imagej.init('sc.fiji:fiji', headless=False)
+
+        self.ui.thumbnailWidget.setViewMode(QListWidget.IconMode)
+        self.ui.thumbnailWidget.setIconSize(QSize(100, 100))
+        self.ui.thumbnailWidget.setResizeMode(QListWidget.Adjust)
+        self.ui.thumbnailWidget.setSpacing(10)
+        self.ui.thumbnailWidget.itemClicked.connect(self.on_image_clicked)
 
 
         # Create an instance of ImageGraphicsView without adding it to a layout
@@ -45,8 +242,14 @@ class MainWindow(QMainWindow):
         self.scene = QGraphicsScene(self)
         self.image_container.setScene(self.scene)
 
-        # Connect the button to open image dialog
-        self.ui.uploadButton.clicked.connect(self.open_image_dialog)
+        # Initialize ImageUploader
+        self.image_uploader = ImageUploader()
+        all_images = self.image_uploader.get_all_images()  # Get all saved images
+        self.display_thumbnails(all_images)
+
+        # Connect the button to open image dialog and save images
+        # self.ui.uploadButton.clicked.connect(self.open_image_dialog)
+
 
         # Connect the analyze button to process the image
         self.ui.analyzeButton.clicked.connect(self.process_image)
@@ -54,11 +257,15 @@ class MainWindow(QMainWindow):
         # Connect the crop button to enable ellipse drawing
 
         # Connect the save button to save the cropped image
+        self.ui.saveImageButton.clicked.connect(self.save_results)
 
         self.ui.addBacteriaButton.clicked.connect(self.add_colonies)
 
-        self.ui.nextButton.clicked.connect(self.next_image)
+        # self.ui.nextButton.clicked.connect(self.next_image)
+        self.ui.loadImageButton.clicked.connect(self.open_image_with_rois)
+        self.ui.addFolderButton.clicked.connect(self.upload_images)
 
+        self.ui.DeleteButton.clicked.connect(self.delete_image)
 
 
         self.pixmap = None
@@ -68,7 +275,231 @@ class MainWindow(QMainWindow):
         self.image_item = None
         self.drawing_enabled = False
 
-    pillow_heif.register_heif_opener()
+    def delete_image(self):
+        """Delete the selected image and its associated ROI file."""
+        reply = QMessageBox.question(
+            self,
+            "Delete Image",
+            "Are you sure you want to delete this image and its associated ROI data?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            try:
+                # Delete the image file
+                if os.path.exists(self.current_image_path):
+                    os.remove(self.current_image_path)
+                    print(f"Deleted image: {self.current_image_path}")
+                else:
+                    print("Image file does not exist.")
+
+                # Try to delete the associated ROI file
+                base_name = os.path.splitext(os.path.basename(self.current_image_path))[0]
+                roi_file_path = os.path.join("app_ROI", f"{base_name}_ROI.zip")
+
+                if os.path.exists(roi_file_path):
+                    os.remove(roi_file_path)
+                    print(f"Deleted ROI file: {roi_file_path}")
+                else:
+                    print("Associated ROI file not found.")
+
+                # Remove the deleted image from saved_hashes
+                if self.current_image_path in self.image_uploader.saved_hashes.values():
+                    del self.image_uploader.saved_hashes[next(key for key, value in self.image_uploader.saved_hashes.items() if value == self.current_image_path)]
+                    print(f"Removed {self.current_image_path} from saved_hashes.")
+
+                # Refresh the thumbnail list (this also ensures the list widget updates)
+
+                self.image_uploader.load_images_into_widget()
+                all_images = self.image_uploader.get_all_images()
+                self.display_thumbnails(all_images)
+
+                # Clear current image display
+                self.scene.clear()
+                self.current_image_path = None
+
+                QMessageBox.information(self, "Deleted", "Image and associated ROI (if any) deleted successfully.")
+
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"An error occurred while deleting: {e}")
+
+
+    def on_image_clicked(self, item):
+        """Handles click events on the list item."""
+        image_path = item.data(Qt.UserRole)  # Retrieve the stored image path
+        print(f"Image clicked: {image_path}")  # Debug: Check which image was clicked
+
+        # Running the macro via ImageJ Python API
+
+        # Running the macro via ImageJ Python API
+
+
+        # Set the current image path
+        self.current_image_path = image_path
+
+        # Display the image in the PyQt GUI
+        self.display_image(image_path)
+
+
+    def display_image(self, image_path):
+       """Displays the clicked image in the main view."""
+       image = Image.open(image_path)
+
+       # Convert the image to QPixmap to display in the QGraphicsView
+       image = image.convert("RGB")  # Ensure it's in RGB mode
+       data = image.tobytes("raw", "RGB")  # Convert to raw byte data
+       qim = QImage(data, image.width, image.height, image.width * 3, QImage.Format_RGB888)
+
+       # Convert QImage to QPixmap
+       pixmap = QPixmap.fromImage(qim)
+
+       if pixmap.isNull():
+           print("Failed to load image!")  # Debug: Image not loaded properly
+           return
+
+       # Clear any existing items in the scene
+       self.scene.clear()
+
+       # Create a QGraphicsPixmapItem with the selected image and add it to the scene
+       self.image_item = QGraphicsPixmapItem(pixmap)
+       self.scene.addItem(self.image_item)
+
+       # Fit the image to the QGraphicsView initially
+       self.image_container.fitInView(self.image_item, Qt.KeepAspectRatio)
+
+       # Store the pixmap for potential future use
+       self.pixmap = pixmap
+
+
+
+
+
+    def upload_images(self):
+        saved_images = self.image_uploader.upload_images()
+        if saved_images:
+            print(f"Saved images: {saved_images}")
+            # Use get_all_images to display both newly saved and already existing images
+            all_images = self.image_uploader.get_all_images()  # Get all images (including previously saved)
+            self.display_thumbnails(all_images)
+
+    def save_results(self):
+        if not hasattr(self, 'current_image_path') or not self.current_image_path:
+            print("No image selected.")
+            return
+
+        # Extract image filename without extension
+        image_name = os.path.splitext(os.path.basename(self.current_image_path))[0]
+        roi_filename = f"{image_name}_ROI.zip"
+
+        # Construct path to app_ROI folder (same level as app_images)
+        app_dir = os.path.dirname(os.path.abspath(self.current_image_path))
+        base_dir = os.path.dirname(app_dir)  # assumes app_images is a subfolder
+        roi_dir = os.path.join(base_dir, "app_ROI")
+
+        # Create the ROI folder if it doesn't exist
+        os.makedirs(roi_dir, exist_ok=True)
+
+        # Full path for ROI file
+        file_path = os.path.join(roi_dir, roi_filename)
+
+        # Escape backslashes for ImageJ macro
+        escaped_path = file_path.replace("\\", "\\\\")
+        macro = f'roiManager("Save", "{escaped_path}");'
+
+        # Run the macro
+        self.ij.py.run_macro(macro)
+        print(f"ROI saved to {file_path}")
+
+    def preprocess_image(self, arr):
+        if arr.shape[2] == 4:
+            arr = arr[:, :, :3]
+
+        resize_factor = 0.1
+        resized_image = cv2.resize(arr, (0, 0), fx=resize_factor, fy=resize_factor)
+        gray_resized = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
+
+        circles_resized = cv2.HoughCircles(
+            gray_resized, cv2.HOUGH_GRADIENT,
+            dp=1.3, minDist=100, param1=50, param2=30,
+            minRadius=30, maxRadius=100
+        )
+
+        if circles_resized is not None:
+            circles_resized = np.round(circles_resized[0, :]).astype("int")
+            image_center = (arr.shape[1] // 2, arr.shape[0] // 2)
+            most_centered_circle = min(
+                circles_resized,
+                key=lambda c: np.sqrt((int(c[0]/resize_factor) - image_center[0])**2 + (int(c[1]/resize_factor) - image_center[1])**2)
+            )
+            x, y, r = (int(most_centered_circle[0] / resize_factor),
+                       int(most_centered_circle[1] / resize_factor),
+                       int(most_centered_circle[2] / resize_factor))
+
+            mask = np.zeros_like(arr)
+            cv2.circle(mask, (x, y), r, (255, 255, 255), -1)
+            result = cv2.bitwise_and(arr, mask)
+
+            x1, y1 = max(0, x - r), max(0, y - r)
+            x2, y2 = min(arr.shape[1], x + r), min(arr.shape[0], y + r)
+            cropped_image = result[y1:y2, x1:x2]
+
+            cropped_image = cropped_image.dot([0.299, 0.587, 0.114])
+            cropped_image = np.clip(cropped_image, 0, 255).astype(np.uint8)
+
+            return cropped_image
+        else:
+            print("No circles found.")
+            return None
+
+    def open_image_with_rois(self):
+        """Auto-load the ROI set associated with the current image."""
+        if not hasattr(self, 'current_image_path') or not self.current_image_path:
+            print("No image selected.")
+            return
+
+        image_path = self.current_image_path.replace("\\", "/")
+        image_name = os.path.basename(image_path)
+        image_stem = os.path.splitext(image_name)[0]
+        roi_dir = os.path.join(os.path.dirname(image_path), "../app_ROI")
+        roi_dir = os.path.abspath(roi_dir)
+        roi_path = os.path.join(roi_dir, f"{image_stem}_ROI.zip").replace("\\", "/")
+
+        if not os.path.exists(image_path):
+            print("Image file does not exist.")
+            return
+
+        if not os.path.exists(roi_path):
+            print(f"ROI file not found: {roi_path}")
+            return
+
+        # Load image as array with OpenCV
+        arr = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+        if arr is None:
+            print("Failed to read image as array")
+            return
+
+        # Run preprocessing only
+        cropped = self.preprocess_image(arr)
+        if cropped is None:
+            print("Preprocessing failed.")
+            return
+
+        # Convert to ImageJ image and show
+        imp = self.ij.py.to_java(cropped)
+        self.ij.ui().show(imp)
+        self.ij.py.run_macro("setTool('freehand');",)
+        # Open ROIs
+        macro = f"""
+        run("ROI Manager...");
+        roiManager("Reset");
+        roiManager("Open", "{roi_path}");
+        roiManager("Show All");
+        """
+        self.ij.py.run_macro(macro)
+        self.add_colonies()
+
+
+
     def open_image_dialog(self):
         # Show file dialog with image filter (including HEIC) for multiple files
         file_paths, _ = QFileDialog.getOpenFileNames(
@@ -140,29 +571,12 @@ class MainWindow(QMainWindow):
             self.ellipse_item = EllipseItem(rect)
             self.scene.addItem(self.ellipse_item)
 
-    def display_image(self, pixmap):
-        # Clear any existing items in the scene
-        self.scene.clear()
-
-        # Create a QGraphicsPixmapItem with the selected image and add it to the scene
-        self.image_item = QGraphicsPixmapItem(pixmap)
-        self.scene.addItem(self.image_item)
-
-        # Fit the image to the QGraphicsView initially
-        self.image_container.fitInView(self.image_item, Qt.KeepAspectRatio)
-
-        # Store the pixmap
-        self.pixmap = pixmap
 
     def add_colonies(self):
 
-
         macro = """
+        run("Clear Results", "");
         roiCount = roiManager("count");
-        if (roiCount > 0) {
-            roiManager("Deselect");
-            roiManager("Delete");
-        }
 
         run("Add to Manager");
 
@@ -170,8 +584,8 @@ class MainWindow(QMainWindow):
             run("ROI Manager...");
         }
 
-
-        roiManager("Select", 0);
+        roiCount = roiManager("count");
+        roiManager("Select", roiCount - 1);
 
         // Debug: Print selection type
         isComposite = (selectionType() == 9); // Check for composite selection
@@ -184,34 +598,32 @@ class MainWindow(QMainWindow):
         // Get the updated ROI count
         roiCountAfter = roiManager("count");
 
-        if (!isComposite || roiCountAfter == 1) {
+        if (!isComposite) {
             // Process single ROI directly
-            roiManager("Select", 0);
-            roiManager("Measure");
+            roiManager("Select", roiCount - 1);
             run("Add Selection...");
-            roiManager("Delete");
         } else {
             // Remove original composite ROI
-            roiManager("Select", 0);
+            roiManager("Select", roiCount - 1);
             roiManager("Delete");
-
-            roiCountAfter = roiManager("count"); // Update count
-
-            // Process each split ROI
-            for (i = roiCountAfter - 1; i >= 0; i--) {
-                roiManager("Select", i);
-                roiManager("Measure");
-                run("Add Selection...");
-                roiManager("Delete");
             }
+        roiCountAfter = roiManager("count"); // Update count
+
+        // Process each split ROI
+        for (i = roiCountAfter - 1; i >= 0; i--) {
+            roiManager("Select", i);
+            roiManager("Measure");
+
         }
-        """
+        for (i = roiCountAfter - 1; i >= roiCount-1; i--) {
+            roiManager("Select", i);
+            run("Add Selection...");
+        }
+        roiManager("Deselect");
+        run("Select None");
+    """
 
         self.ij.py.run_macro(macro)
-
-
-
-
 
 
     def process_image(self):
@@ -235,15 +647,11 @@ class MainWindow(QMainWindow):
 
 
 
-        # Step 1: Read the original image
-        # image_path = r'C:\Users\luke\Downloads\IMG_5280.jpg'  # Replace with the correct path
-        # image = cv2.imread(image_path)
-
         # Check if the image is loaded properly
         if arr is None:
             print("Error: The image could not be loaded.")
         else:
-            # Step 2: Resize the image to reduce computation
+             #Resize the image to reduce computation
             resize_factor = 0.1  # Resize to 10% of the original size (you can adjust this)
             resized_image = cv2.resize(arr, (0, 0), fx=resize_factor, fy=resize_factor)
 
@@ -333,86 +741,44 @@ class MainWindow(QMainWindow):
         imp = self.ij.py.to_java(cropped_image)
 
         # Show the image in ImageJ
+
+
+        # Running the macro via ImageJ Python API
+        # self.ij.py.run_macro(macro)
+
+
+        # # Running the macro via ImageJ Python API
+        # self.ij.py.run_macro(macro)
         self.ij.ui().show(imp)
 
-        # Run commands in ImageJ
 
-        # self.ij.ui().show(imp)
-
-
-        # image_to_thresh = self.ij.py.from_java(imp)
-        # image_to_thresh = np.array(image_to_thresh)
-
-        # # Apply an inverted simple threshold
-        # thresh_value = 175  # The threshold value
-        # max_value = 255  # Max value for the thresholded pixels (white)
-
-        # # Invert the threshold operation (black becomes white, white becomes black)
-        # retval, thresholded_image = cv2.threshold(image_to_thresh, thresh_value, max_value, cv2.THRESH_BINARY_INV)
-        # # retval, thresholded_image = cv2.threshold(image_to_thresh, thresh_value, max_value, cv2.THRESH_BINARY)
-
-        # # Convert back to ImagePlus (Java object)
-        # imp = self.ij.py.to_java(thresholded_image)
-
-
-
-        # Access and modify a preference (for example, black background setting)
-
-
-        # Access and modify a preference (for example, black background setting)
-
-
-        # self.ij.py.run_macro('setOption("BlackBackground", true);')
         self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit
 
         self.ij.py.run_macro("run('Convert to Mask');",)
         self.ij.py.run_macro('setThreshold(0, 0);')
         self.ij.py.run_macro("run('Convert to Mask');",)
-        # self.ij.py.run_macro("run('Make Binary');",)
 
-
-
-
-        # self.ij.ui().setBlackBackground(True)
-        # # Optionally, print to confirm
-        # print(prefs.get('blackBackground'))  # Should print True
-        # self.ij.py.run_macro("run('Convert to Mask');",)
-
-        # # Optionally, show the inverted image
-
-        # self.ij.py.run_macro("run('transform.invert');",)
-      #   # self.ij.ui().show(imp)
-      #   # self.ij.py.run_macro("run('8-bit');",)
-        # self.ij.py.run_macro("run('Fill Holes', '');",)
-        # self.ij.py.run_macro("run('Watershed');",)
-        # self.ij.py.run_macro("run('Remove Outliers...', 'radius=2 threshold=50 which=Bright');",)
-      #   # self.ij.py.run_macro("run('Watershed');",)  # Apply watershed
-      #   # self.ij.py.run_macro("run('Remove Outliers...', 'radius=15 threshold=50 which=Bright');",)
         self.ij.py.run_macro("run('Remove Outliers...', 'radius=2 threshold=50 which=Bright');",)
         for i in range(2):
             self.ij.py.run_macro("run('Despeckle');",)
 
-      # # Analyze particles with specific settings
-        # self.ij.py.run_macro("run('Gaussian Blur...', 'sigma=2');",)
-
-        # self.ij.py.run_macro("run('Analyze Particles...', 'size=50-50000 circularity=0.65-1.00 show=Outlines display exclude summarize overlay');",)
         self.ij.py.run_macro("run('Watershed');",)
-        self.ij.py.run_macro("run('Analyze Particles...', 'size=70-50000 circularity=0.70-1.00 display exclude summarize overlay');",)
+        self.ij.py.run_macro("run('Analyze Particles...', 'size=70-50000 circularity=0.70-1.00 display exclude summarize overlay add');",)
 
         self.ij.py.run_macro("setTool('freehand');",)
         self.ij.ui().show(imp)
 
-      # # # Optionally, you can save the result if needed
-      # # # self.ij.io().save(imp, 'path_to_save_result')  # Uncomment to save
+        self.ij.py.run_macro("""
+        if (!isOpen("ROI Manager")) {
+            run("ROI Manager...");
+        }
+        roiCount = roiManager("count");
+        if (roiCount > 0) {
+            roiManager("Select", 0);
+            roiManager("Update");
+        }
+        """)
 
-      # # # Close ImageJ after processing (optional)
-      # #   self.ij.dispose()
-
-      # # # Show success message
-      # #   QMessageBox.information(None, "Success", "Image processed and thresholded successfully")
-
-      # # # Clear the ImageJ window
-      # #   self.ij.window().clear()
 
 
 if __name__ == "__main__":
