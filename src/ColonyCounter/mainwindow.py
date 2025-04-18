@@ -26,6 +26,8 @@ import shutil
 import hashlib
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
 import psutil
+import pandas as pd
+
 
 
 pillow_heif.register_heif_opener()
@@ -764,6 +766,21 @@ class MainWindow(QMainWindow):
 
         self.ij.py.run_macro("run('Watershed');",)
         self.ij.py.run_macro("run('Analyze Particles...', 'size=70-50000 circularity=0.70-1.00 display exclude summarize overlay add');",)
+        
+        self.ij.py.run_macro("""
+            // Save Summary table if open
+            if (isOpen("Summary")) {
+                selectWindow("Summary");
+                saveAs("Results", "summary_temp.csv");
+            }
+        """)
+
+        # Load the CSV into pandas
+        df_summary = pd.read_csv("summary_temp.csv")
+        # copy summary results from csv to excel
+        df_summary.to_excel("summary_results.xlsx", index=False)
+        print("✅ Summary saved to summary_results.xlsx")
+
 
         self.ij.py.run_macro("setTool('freehand');",)
         self.ij.ui().show(imp)
