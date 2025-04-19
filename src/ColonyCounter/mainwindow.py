@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QMessageBox, QGraphicsEllipseItem, QGraphicsItem, QGraphicsRectItem, QSlider, QInputDialog
-from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath, QIcon
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QMessageBox, QGraphicsEllipseItem, QGraphicsItem, QGraphicsRectItem, QSlider, QInputDialog,  QVBoxLayout,  QSizePolicy
+from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath, QIcon, QWindow
 import time
 from PySide6.QtCore import Qt, QRectF, QSize
 from ui_form import Ui_MainWindow
@@ -26,6 +26,8 @@ import shutil
 import hashlib
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
 import psutil
+import win32gui
+import time
 
 
 pillow_heif.register_heif_opener()
@@ -227,6 +229,19 @@ class MainWindow(QMainWindow):
         self.ui.thumbnailWidget.setResizeMode(QListWidget.Adjust)
         self.ui.thumbnailWidget.setSpacing(10)
         self.ui.thumbnailWidget.itemClicked.connect(self.on_image_clicked)
+        # Ensure the layout object is correctly assigned from Qt Designer
+        layout = QVBoxLayout()
+        self.ui.centralwidget_2.setLayout(layout)
+
+       # Create the ImageJ container widget
+        self.imagejContainer = QWidget(self)
+
+       # Set the QSizePolicy for the imagejContainer to Fixed
+        size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.imagejContainer.setSizePolicy(size_policy)  # Fix size of the widget
+
+       # Add the imagejContainer to the layout
+        layout.addWidget(self.imagejContainer)
 
 
         # Create an instance of ImageGraphicsView without adding it to a layout
@@ -625,6 +640,21 @@ class MainWindow(QMainWindow):
 
         self.ij.py.run_macro(macro)
 
+    def find_imagej_hwnd(self, timeout=5.0):
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            def enum_handler(hwnd, result):
+                title = win32gui.GetWindowText(hwnd)
+                print(f"Window title: {title}")  # For debugging
+                if "(V)" in title:  # Match the window title
+                    result.append(hwnd)
+
+            hwnds = []
+            win32gui.EnumWindows(enum_handler, hwnds)
+            if hwnds:
+                return hwnds[0]
+            time.sleep(0.1)
+        return None
 
     def process_image(self):
         if self.pixmap is None:
@@ -750,6 +780,32 @@ class MainWindow(QMainWindow):
         # # Running the macro via ImageJ Python API
         # self.ij.py.run_macro(macro)
         self.ij.ui().show(imp)
+
+        time.sleep(1)  # Give time to draw
+
+        hwnd = self.find_imagej_hwnd()
+        if hwnd:
+            print(f"Found ImageJ HWND: {hwnd}")
+            try:
+                win = QWindow.fromWinId(hwnd)  # Convert hwnd to QWindow
+                container = self.createWindowContainer(win)  # Create a container for QWindow
+
+                if self.ui.centralwidget_2.layout():  # Ensure the layout is properly assigned
+                    self.ui.centralwidget_2.layout().addWidget(container)  # Add container to layout
+
+                                   # Set fixed size and position for the container
+                    container.setFixedSize(800, 800)  # Set the fixed size
+                    container.move(0, 0)  # Set position to top-left
+
+                                   # Show the window
+                    # self.setGeometry(500, 500, 800, 600)
+                    self.show()
+                else:
+                    print("Central widget layout is not initialized.")
+            except Exception as e:
+                print(f"Error embedding ImageJ window: {e}")
+        else:
+            print("Failed to find ImageJ window")
 
 
         self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit

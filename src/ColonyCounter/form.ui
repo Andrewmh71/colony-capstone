@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>912</width>
+    <width>1790</width>
     <height>599</height>
    </rect>
   </property>
@@ -110,6 +110,16 @@
     </property>
     <property name="text">
      <string>Delete</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="centralwidget_2" native="true">
+    <property name="geometry">
+     <rect>
+      <x>930</x>
+      <y>20</y>
+      <width>741</width>
+      <height>501</height>
+     </rect>
     </property>
    </widget>
   </widget>

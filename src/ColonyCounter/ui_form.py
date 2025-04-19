@@ -23,7 +23,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(912, 599)
+        MainWindow.resize(1790, 599)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.imageContainer = QGraphicsView(self.centralwidget)
@@ -50,6 +50,9 @@ class Ui_MainWindow(object):
         self.DeleteButton = QPushButton(self.centralwidget)
         self.DeleteButton.setObjectName(u"DeleteButton")
         self.DeleteButton.setGeometry(QRect(20, 60, 51, 31))
+        self.centralwidget_2 = QWidget(self.centralwidget)
+        self.centralwidget_2.setObjectName(u"centralwidget_2")
+        self.centralwidget_2.setGeometry(QRect(930, 20, 741, 501))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
