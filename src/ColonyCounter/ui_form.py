@@ -52,7 +52,7 @@ class Ui_MainWindow(object):
         self.DeleteButton.setGeometry(QRect(20, 60, 51, 31))
         self.centralwidget_2 = QWidget(self.centralwidget)
         self.centralwidget_2.setObjectName(u"centralwidget_2")
-        self.centralwidget_2.setGeometry(QRect(930, 20, 741, 501))
+        self.centralwidget_2.setGeometry(QRect(920, 40, 521, 451))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")

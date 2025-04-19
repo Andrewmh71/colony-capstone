@@ -28,6 +28,7 @@ from PySide6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QListWidget
 import psutil
 import win32gui
 import time
+import win32con
 
 
 pillow_heif.register_heif_opener()
@@ -198,9 +199,7 @@ class ImageUploader(QMainWindow):
         # Store the pixmap for potential future use
         self.pixmap = pixmap
 
-
 class MainWindow(QMainWindow):
-
 
     def display_thumbnails(self, image_paths):
            """Displays thumbnails of the images in the QListWidget."""
@@ -219,6 +218,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.hwnd = []
         sj.config.add_option('-Xmx1g')
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -344,6 +344,11 @@ class MainWindow(QMainWindow):
         image_path = item.data(Qt.UserRole)  # Retrieve the stored image path
         print(f"Image clicked: {image_path}")  # Debug: Check which image was clicked
 
+        if self.hwnd:
+            print(self.hwnd)
+            for elem in self.hwnd:
+                    win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
+            self.hwnd = []
         # Running the macro via ImageJ Python API
 
         # Running the macro via ImageJ Python API
@@ -502,6 +507,27 @@ class MainWindow(QMainWindow):
         # Convert to ImageJ image and show
         imp = self.ij.py.to_java(cropped)
         self.ij.ui().show(imp)
+        hwnd = self.find_imagej_hwnd()
+        if hwnd:
+            print(f"Found ImageJ HWND: {hwnd}")
+            self.hwnd.append(hwnd)
+            try:
+                win = QWindow.fromWinId(hwnd)  # Convert hwnd to QWindow
+                container = self.createWindowContainer(win)  # Create a container for QWindow
+
+                # Parent the container to centralwidget_2
+                self.container = container
+                self.container.setParent(self.ui.centralwidget_2)
+
+                # Set the geometry to match the parent widget's size (top-left)
+                self.container.setGeometry(self.ui.centralwidget_2.rect())  # Fills the space
+                self.container.show()
+
+            except Exception as e:
+                print(f"Error embedding ImageJ window: {e}")
+        else:
+            print("Failed to find ImageJ window")
+
         self.ij.py.run_macro("setTool('freehand');",)
         # Open ROIs
         macro = f"""
@@ -641,12 +667,13 @@ class MainWindow(QMainWindow):
         self.ij.py.run_macro(macro)
 
     def find_imagej_hwnd(self, timeout=5.0):
+
         start_time = time.time()
         while time.time() - start_time < timeout:
             def enum_handler(hwnd, result):
                 title = win32gui.GetWindowText(hwnd)
                 print(f"Window title: {title}")  # For debugging
-                if "(V)" in title:  # Match the window title
+                if "(V)" in title:
                     result.append(hwnd)
 
             hwnds = []
@@ -783,30 +810,12 @@ class MainWindow(QMainWindow):
 
         time.sleep(1)  # Give time to draw
 
-        hwnd = self.find_imagej_hwnd()
-        if hwnd:
-            print(f"Found ImageJ HWND: {hwnd}")
-            try:
-                win = QWindow.fromWinId(hwnd)  # Convert hwnd to QWindow
-                container = self.createWindowContainer(win)  # Create a container for QWindow
 
-                if self.ui.centralwidget_2.layout():  # Ensure the layout is properly assigned
-                    self.ui.centralwidget_2.layout().addWidget(container)  # Add container to layout
 
-                                   # Set fixed size and position for the container
-                    container.setFixedSize(800, 800)  # Set the fixed size
-                    container.move(0, 0)  # Set position to top-left
+        # Handle the resizing event to reset position and avoid jumping around
 
-                                   # Show the window
-                    # self.setGeometry(500, 500, 800, 600)
-                    self.show()
-                else:
-                    print("Central widget layout is not initialized.")
-            except Exception as e:
-                print(f"Error embedding ImageJ window: {e}")
-        else:
-            print("Failed to find ImageJ window")
 
+        self.ij.py.run_macro('roiManager("Reset");')
 
         self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit
 
@@ -824,6 +833,28 @@ class MainWindow(QMainWindow):
         self.ij.py.run_macro("setTool('freehand');",)
         self.ij.ui().show(imp)
 
+
+        hwnd = self.find_imagej_hwnd()
+        if hwnd:
+            print(f"Found ImageJ HWND: {hwnd}")
+            self.hwnd.append(hwnd)
+            try:
+                win = QWindow.fromWinId(hwnd)  # Convert hwnd to QWindow
+                container = self.createWindowContainer(win)  # Create a container for QWindow
+
+                # Parent the container to centralwidget_2
+                self.container = container
+                self.container.setParent(self.ui.centralwidget_2)
+
+                # Set the geometry to match the parent widget's size (top-left)
+                self.container.setGeometry(self.ui.centralwidget_2.rect())  # Fills the space
+                self.container.show()
+
+            except Exception as e:
+                print(f"Error embedding ImageJ window: {e}")
+        else:
+            print("Failed to find ImageJ window")
+
         self.ij.py.run_macro("""
         if (!isOpen("ROI Manager")) {
             run("ROI Manager...");
@@ -836,6 +867,27 @@ class MainWindow(QMainWindow):
         """)
 
 
+
+    def wheelEvent(self, event):
+        if hasattr(self, "container"):
+            self.container.move(0, 0)  # Move to top-left corner explicitly if needed
+            # Get the current mouse position within the container
+
+
+    def resizeEvent(self, event):
+         """
+         Ensure that the ImageJ window stays centered (top-left position)
+         """
+         super().resizeEvent(event)
+
+         # Ensure the container (ImageJ window) stays fixed in the top-left of the parent widget
+         if hasattr(self, "container"):
+             parent_rect = self.ui.centralwidget_2.rect()
+
+             # Align the container to the top-left corner of the parent widget
+             self.container.setGeometry(parent_rect)  # Align with the parent widget's geometry
+             self.container.move(0, 0)  # Move to top-left corner explicitly if needed
+             print("Container resized and moved to top-left.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -115,10 +115,10 @@
    <widget class="QWidget" name="centralwidget_2" native="true">
     <property name="geometry">
      <rect>
-      <x>930</x>
-      <y>20</y>
-      <width>741</width>
-      <height>501</height>
+      <x>920</x>
+      <y>40</y>
+      <width>521</width>
+      <height>451</height>
      </rect>
     </property>
    </widget>
