@@ -29,6 +29,12 @@ import psutil
 import win32gui
 import time
 import win32con
+import pandas as pd
+from pandas import ExcelWriter
+import openpyxl
+import tkinter as tk
+from tkinter import filedialog
+import re
 
 
 pillow_heif.register_heif_opener()
@@ -273,6 +279,7 @@ class MainWindow(QMainWindow):
 
         # Connect the save button to save the cropped image
         self.ui.saveImageButton.clicked.connect(self.save_results)
+        self.ui.excelButton.clicked.connect(self.export_results)
 
         self.ui.addBacteriaButton.clicked.connect(self.add_colonies)
 
@@ -289,6 +296,52 @@ class MainWindow(QMainWindow):
         self.image = None
         self.image_item = None
         self.drawing_enabled = False
+
+        import pandas as pd
+        from pandas import ExcelWriter
+        import openpyxl
+        import tkinter as tk
+        from tkinter import filedialog
+        import re
+
+    def export_results(self):
+        # Run ImageJ macro
+        self.ij.py.run_macro("""
+            if (isOpen("Results")) {
+                selectWindow("Results");
+                saveAs("Results", "app_csv/summary_temp.csv");
+            }
+        """)
+
+        # Read the summary CSV file into a DataFrame
+        df_summary = pd.read_csv("app_csv/summary_temp.csv")
+
+        # Open a file dialog to select the existing Excel file
+        root = tk.Tk()
+        root.withdraw()  # Hide the root window
+        file_path = filedialog.askopenfilename(title="Select an Excel file", filetypes=[("Excel files", "*.xlsx;*.xls")])
+
+        if not file_path:
+            print("No file selected.")
+            return
+
+        # Extract the file name from current image path
+        match = re.search(r'[^/\\]+$', self.current_image_path)
+
+        if match:
+            # Get the matched file name for the sheet name
+            sheet_name = match.group(0)  # Extracted file name as the sheet name
+
+            try:
+                # Try to open the existing Excel file to append a new sheet
+                with ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
+                    df_summary.to_excel(writer, sheet_name=sheet_name, index=False)
+                print(f"Summary saved to {file_path} in sheet '{sheet_name}'")
+            except FileNotFoundError:
+                print(f"File not found: {file_path}")
+        else:
+            print("No image selected")
+
 
     def delete_image(self):
         """Delete the selected image and its associated ROI file."""
@@ -667,12 +720,14 @@ class MainWindow(QMainWindow):
         self.ij.py.run_macro(macro)
 
     def find_imagej_hwnd(self, timeout=5.0):
-
         start_time = time.time()
         while time.time() - start_time < timeout:
             def enum_handler(hwnd, result):
                 title = win32gui.GetWindowText(hwnd)
-                print(f"Window title: {title}")  # For debugging
+                try:
+                    print(f"Window title: {title}")  # For debugging
+                except UnicodeEncodeError:
+                    print(f"Window title (unicode error): {title.encode('ascii', 'ignore').decode('ascii')}")
                 if "(V)" in title:
                     result.append(hwnd)
 

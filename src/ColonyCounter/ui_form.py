@@ -53,6 +53,9 @@ class Ui_MainWindow(object):
         self.centralwidget_2 = QWidget(self.centralwidget)
         self.centralwidget_2.setObjectName(u"centralwidget_2")
         self.centralwidget_2.setGeometry(QRect(920, 40, 521, 451))
+        self.excelButton = QPushButton(self.centralwidget)
+        self.excelButton.setObjectName(u"excelButton")
+        self.excelButton.setGeometry(QRect(70, 20, 111, 24))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -71,5 +74,6 @@ class Ui_MainWindow(object):
         self.loadImageButton.setText(QCoreApplication.translate("MainWindow", u"Load", None))
         self.addFolderButton.setText(QCoreApplication.translate("MainWindow", u"Add Images to Workspce", None))
         self.DeleteButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
+        self.excelButton.setText(QCoreApplication.translate("MainWindow", u"Export To Excel", None))
     # retranslateUi
 
