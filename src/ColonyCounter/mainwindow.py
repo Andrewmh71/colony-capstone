@@ -88,6 +88,7 @@ class ImageUploader(QMainWindow):
                 image_hash = self._get_image_hash(image_path)
                 self.saved_hashes[image_hash] = image_path  # Store the hash and path
 
+    #Hash each uploaded image, so that duplicates cannot be uploaded
     def _get_image_hash(self, image_path):
         """Generate a hash for the given image file"""
         hash_sha256 = hashlib.sha256()
@@ -307,10 +308,10 @@ class MainWindow(QMainWindow):
     def export_results(self):
         # Run ImageJ macro
         self.ij.py.run_macro("""
-            if (isOpen("Results")) {
-                selectWindow("Results");
-                saveAs("Results", "app_csv/summary_temp.csv");
-            }
+        if (isOpen("Results")) {
+            selectWindow("Results");
+            saveAs("Results", "app_csv/summary_temp.csv");
+        }
         """)
 
         # Read the summary CSV file into a DataFrame
@@ -393,6 +394,10 @@ class MainWindow(QMainWindow):
 
 
     def on_image_clicked(self, item):
+
+        self.ij.py.run_macro("""
+        run("Clear Results", "");
+        roiManager("Reset");""")
         """Handles click events on the list item."""
         image_path = item.data(Qt.UserRole)  # Retrieve the stored image path
         print(f"Image clicked: {image_path}")  # Debug: Check which image was clicked
@@ -402,6 +407,7 @@ class MainWindow(QMainWindow):
             for elem in self.hwnd:
                     win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
             self.hwnd = []
+
         # Running the macro via ImageJ Python API
 
         # Running the macro via ImageJ Python API
@@ -519,12 +525,26 @@ class MainWindow(QMainWindow):
             cropped_image = cropped_image.dot([0.299, 0.587, 0.114])
             cropped_image = np.clip(cropped_image, 0, 255).astype(np.uint8)
 
+
+            # downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+            # output_path = os.path.join(downloads_dir, "cropped_image.png")
+            # cv2.imwrite(output_path, cropped_image)
+            # print(f"Saved cropped image to: {output_path}")
+
             return cropped_image
         else:
             print("No circles found.")
             return None
 
     def open_image_with_rois(self):
+
+        if self.hwnd:
+            QMessageBox.information(
+                self,
+                "Image Already Loaded",
+                "An image is already loaded. Please close it before opening another."
+            )
+            return
         """Auto-load the ROI set associated with the current image."""
         if not hasattr(self, 'current_image_path') or not self.current_image_path:
             print("No image selected.")
@@ -587,10 +607,14 @@ class MainWindow(QMainWindow):
         run("ROI Manager...");
         roiManager("Reset");
         roiManager("Open", "{roi_path}");
-        roiManager("Show All");
+        //roiManager("Show All");
+        roiManager("Show All with labels");
+        roiManager("Deselect");
+        roiManager("Measure");
+
         """
         self.ij.py.run_macro(macro)
-        self.add_colonies()
+        # self.add_colonies()
 
 
 
@@ -669,7 +693,7 @@ class MainWindow(QMainWindow):
     def add_colonies(self):
 
         macro = """
-        run("Clear Results", "");
+        //run("Clear Results", "");
         roiCount = roiManager("count");
 
         run("Add to Manager");
@@ -703,18 +727,29 @@ class MainWindow(QMainWindow):
             }
         roiCountAfter = roiManager("count"); // Update count
 
-        // Process each split ROI
-        for (i = roiCountAfter - 1; i >= 0; i--) {
-            roiManager("Select", i);
-            roiManager("Measure");
 
-        }
-        for (i = roiCountAfter - 1; i >= roiCount-1; i--) {
-            roiManager("Select", i);
-            run("Add Selection...");
-        }
+        run("Clear Results", "");
         roiManager("Deselect");
-        run("Select None");
+        roiManager("Measure");
+
+
+
+
+
+
+
+        // Process each split ROI
+        //for (i = roiCountAfter - 1; i >= 0; i--) {
+            //roiManager("Select", i);
+            //roiManager("Measure");
+
+       // }
+        //for (i = roiCountAfter - 1; i >= roiCount-1; i--) {
+           // roiManager("Select", i);
+           // run("Add Selection...");
+      // }
+       // roiManager("Deselect");
+       // run("Select None");
     """
 
         self.ij.py.run_macro(macro)
@@ -739,6 +774,15 @@ class MainWindow(QMainWindow):
         return None
 
     def process_image(self):
+
+
+        if self.hwnd:
+            QMessageBox.information(
+                self,
+                "Image Already Loaded",
+                "An image is already loaded. Please close it before opening another."
+            )
+            return
         if self.pixmap is None:
             QMessageBox.information(None, "Error", "No image loaded")
             return
