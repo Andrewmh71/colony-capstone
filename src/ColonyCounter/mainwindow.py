@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QMessageBox, QGraphicsEllipseItem, QGraphicsItem, QGraphicsRectItem, QSlider, QInputDialog
-from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath, QIcon
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QMessageBox, QGraphicsEllipseItem, QGraphicsItem, QGraphicsRectItem, QSlider, QInputDialog,  QVBoxLayout,  QSizePolicy
+from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath, QIcon, QWindow
 import time
 from PySide6.QtCore import Qt, QRectF, QSize
 from ui_form import Ui_MainWindow
@@ -26,7 +26,16 @@ import shutil
 import hashlib
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
 import psutil
+import win32gui
+import time
+import win32con
 import pandas as pd
+from pandas import ExcelWriter
+import openpyxl
+import tkinter as tk
+from tkinter import filedialog
+import re
+
 
 
 
@@ -198,9 +207,7 @@ class ImageUploader(QMainWindow):
         # Store the pixmap for potential future use
         self.pixmap = pixmap
 
-
 class MainWindow(QMainWindow):
-
 
     def display_thumbnails(self, image_paths):
            """Displays thumbnails of the images in the QListWidget."""
@@ -219,6 +226,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.hwnd = []
         sj.config.add_option('-Xmx1g')
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -229,6 +237,19 @@ class MainWindow(QMainWindow):
         self.ui.thumbnailWidget.setResizeMode(QListWidget.Adjust)
         self.ui.thumbnailWidget.setSpacing(10)
         self.ui.thumbnailWidget.itemClicked.connect(self.on_image_clicked)
+        # Ensure the layout object is correctly assigned from Qt Designer
+        layout = QVBoxLayout()
+        self.ui.centralwidget_2.setLayout(layout)
+
+       # Create the ImageJ container widget
+        self.imagejContainer = QWidget(self)
+
+       # Set the QSizePolicy for the imagejContainer to Fixed
+        size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.imagejContainer.setSizePolicy(size_policy)  # Fix size of the widget
+
+       # Add the imagejContainer to the layout
+        layout.addWidget(self.imagejContainer)
 
 
         # Create an instance of ImageGraphicsView without adding it to a layout
@@ -260,6 +281,7 @@ class MainWindow(QMainWindow):
 
         # Connect the save button to save the cropped image
         self.ui.saveImageButton.clicked.connect(self.save_results)
+        self.ui.excelButton.clicked.connect(self.export_results)
 
         self.ui.addBacteriaButton.clicked.connect(self.add_colonies)
 
@@ -276,6 +298,45 @@ class MainWindow(QMainWindow):
         self.image = None
         self.image_item = None
         self.drawing_enabled = False
+
+        import pandas as pd
+        from pandas import ExcelWriter
+        import openpyxl
+        import tkinter as tk
+        from tkinter import filedialog
+        import re
+
+    def export_results(self):
+
+        # Read the summary CSV file into a DataFrame
+        df_summary = pd.read_csv("final_summary.csv")
+
+        # Open a file dialog to select the existing Excel file
+        root = tk.Tk()
+        root.withdraw()  # Hide the root window
+        file_path = filedialog.askopenfilename(title="Select an Excel file", filetypes=[("Excel files", "*.xlsx;*.xls")])
+
+        if not file_path:
+            print("No file selected.")
+            return
+
+        # Extract the file name from current image path
+        match = re.search(r'[^/\\]+$', self.current_image_path)
+
+        if match:
+            # Get the matched file name for the sheet name
+            sheet_name = match.group(0)  # Extracted file name as the sheet name
+
+            try:
+                # Try to open the existing Excel file to append a new sheet
+                with ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
+                    df_summary.to_excel(writer, sheet_name=sheet_name, index=False)
+                print(f"Summary saved to {file_path} in sheet '{sheet_name}'")
+            except FileNotFoundError:
+                print(f"File not found: {file_path}")
+        else:
+            print("No image selected")
+
 
     def delete_image(self):
         """Delete the selected image and its associated ROI file."""
@@ -331,6 +392,11 @@ class MainWindow(QMainWindow):
         image_path = item.data(Qt.UserRole)  # Retrieve the stored image path
         print(f"Image clicked: {image_path}")  # Debug: Check which image was clicked
 
+        if self.hwnd:
+            print(self.hwnd)
+            for elem in self.hwnd:
+                    win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
+            self.hwnd = []
         # Running the macro via ImageJ Python API
 
         # Running the macro via ImageJ Python API
@@ -489,6 +555,27 @@ class MainWindow(QMainWindow):
         # Convert to ImageJ image and show
         imp = self.ij.py.to_java(cropped)
         self.ij.ui().show(imp)
+        hwnd = self.find_imagej_hwnd()
+        if hwnd:
+            print(f"Found ImageJ HWND: {hwnd}")
+            self.hwnd.append(hwnd)
+            try:
+                win = QWindow.fromWinId(hwnd)  # Convert hwnd to QWindow
+                container = self.createWindowContainer(win)  # Create a container for QWindow
+
+                # Parent the container to centralwidget_2
+                self.container = container
+                self.container.setParent(self.ui.centralwidget_2)
+
+                # Set the geometry to match the parent widget's size (top-left)
+                self.container.setGeometry(self.ui.centralwidget_2.rect())  # Fills the space
+                self.container.show()
+
+            except Exception as e:
+                print(f"Error embedding ImageJ window: {e}")
+        else:
+            print("Failed to find ImageJ window")
+
         self.ij.py.run_macro("setTool('freehand');",)
         # Open ROIs
         macro = f"""
@@ -627,6 +714,24 @@ class MainWindow(QMainWindow):
 
         self.ij.py.run_macro(macro)
 
+    def find_imagej_hwnd(self, timeout=5.0):
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            def enum_handler(hwnd, result):
+                title = win32gui.GetWindowText(hwnd)
+                try:
+                    print(f"Window title: {title}")  # For debugging
+                except UnicodeEncodeError:
+                    print(f"Window title (unicode error): {title.encode('ascii', 'ignore').decode('ascii')}")
+                if "(V)" in title:
+                    result.append(hwnd)
+
+            hwnds = []
+            win32gui.EnumWindows(enum_handler, hwnds)
+            if hwnds:
+                return hwnds[0]
+            time.sleep(0.1)
+        return None
 
     def process_image(self):
         if self.pixmap is None:
@@ -753,6 +858,14 @@ class MainWindow(QMainWindow):
         # self.ij.py.run_macro(macro)
         self.ij.ui().show(imp)
 
+        time.sleep(1)  # Give time to draw
+
+
+
+        # Handle the resizing event to reset position and avoid jumping around
+
+
+        self.ij.py.run_macro('roiManager("Reset");')
 
         self.ij.py.run_macro("run('8-bit');",)  # Convert to 8-bit
 
@@ -773,17 +886,78 @@ class MainWindow(QMainWindow):
                 selectWindow("Summary");
                 saveAs("Results", "summary_temp.csv");
             }
+            // Save Results table if open
+            if (isOpen("Results")) {
+                selectWindow("Results");
+                saveAs("Results", "results_table.csv");
+            }
         """)
+        df_results = pd.read_csv("results_table.csv")
+        sizes = df_results["Area"]
+        std_dev_size = round(df_results["Area"].std(ddof=1), 3)
+
 
         # Load the CSV into pandas
         df_summary = pd.read_csv("summary_temp.csv")
         # copy summary results from csv to excel
-        df_summary.to_excel("summary_results.xlsx", index=False)
-        print("✅ Summary saved to summary_results.xlsx")
+    
 
+        image_file_name = os.path.basename(self.current_image_path)
+        project_id = "PROJECT_001"
+        colony_label = "PetriDish_A"
+
+        try:
+            number_of_colonies = int(df_summary.at[0, 'Count'])
+            average_size = float(df_summary.at[0, 'Average Size'])
+        except KeyError:
+            print("Expected columns missing.")
+            return
+
+
+        final_row = pd.DataFrame([{
+            "project_id": project_id,
+            "image_file_name": image_file_name,
+            "colony_label": colony_label,
+            "number_of_colonies": number_of_colonies,
+            "average_size": average_size,
+            "std_dev_size": std_dev_size
+        }])
+
+        # Save to final_summary.csv (append if exists)
+        csv_path = "final_summary.csv"
+        if os.path.exists(csv_path):
+            final_row.to_csv(csv_path, mode='a', header=False, index=False)
+        else:
+            final_row.to_csv(csv_path, index=False)
 
         self.ij.py.run_macro("setTool('freehand');",)
         self.ij.ui().show(imp)
+
+        df_final = pd.read_csv("final_summary.csv")
+        df_final.to_excel("summary_results.xlsx", index=False)
+        print("✅ Summary saved to summary_results.xlsx")
+
+
+        hwnd = self.find_imagej_hwnd()
+        if hwnd:
+            print(f"Found ImageJ HWND: {hwnd}")
+            self.hwnd.append(hwnd)
+            try:
+                win = QWindow.fromWinId(hwnd)  # Convert hwnd to QWindow
+                container = self.createWindowContainer(win)  # Create a container for QWindow
+
+                # Parent the container to centralwidget_2
+                self.container = container
+                self.container.setParent(self.ui.centralwidget_2)
+
+                # Set the geometry to match the parent widget's size (top-left)
+                self.container.setGeometry(self.ui.centralwidget_2.rect())  # Fills the space
+                self.container.show()
+
+            except Exception as e:
+                print(f"Error embedding ImageJ window: {e}")
+        else:
+            print("Failed to find ImageJ window")
 
         self.ij.py.run_macro("""
         if (!isOpen("ROI Manager")) {
@@ -797,6 +971,27 @@ class MainWindow(QMainWindow):
         """)
 
 
+
+    def wheelEvent(self, event):
+        if hasattr(self, "container"):
+            self.container.move(0, 0)  # Move to top-left corner explicitly if needed
+            # Get the current mouse position within the container
+
+
+    def resizeEvent(self, event):
+         """
+         Ensure that the ImageJ window stays centered (top-left position)
+         """
+         super().resizeEvent(event)
+
+         # Ensure the container (ImageJ window) stays fixed in the top-left of the parent widget
+         if hasattr(self, "container"):
+             parent_rect = self.ui.centralwidget_2.rect()
+
+             # Align the container to the top-left corner of the parent widget
+             self.container.setGeometry(parent_rect)  # Align with the parent widget's geometry
+             self.container.move(0, 0)  # Move to top-left corner explicitly if needed
+             print("Container resized and moved to top-left.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
