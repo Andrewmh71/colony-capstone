@@ -1,19 +1,23 @@
 Low-Cost Bacterial Colony Processing System
+
 An accessible, open-source alternative to expensive commercial colony counting tools.
 
 Team Members
+
     Luke Ellister
     Andrew Hister
     Timmy Le
     Jose Navarro
 
 Project Timeline / Status
+
     Currently in advanced development.
     Core features are functional and ready for testing and refinement.
 
 Value Proposition
 
 Problem Statement
+
     Accurately analyzing and counting bacterial colonies is a fundamental task in microbiological research.
     However, balancing precision and efficiency presents significant challenges.
 
@@ -28,15 +32,18 @@ Existing Methods
         Drawbacks: Require expensive hardware and complex proprietary software
 
 The Dilemma
+
     Biologists face two difficult options:
         1. Invest thousands of dollars in commercial automated systems
         2. Rely on manual methods, sacrificing time and productivity
 
 Our Solution
+
     This project bridges the gap by offering an accessible, accurate, and user-friendly image analysis tool
     that provides the benefits of automation—without the financial or technical burden.
 
 Target Audience
+
     Microbiology researchers and laboratory technicians seeking a cost-effective colony analysis solution.
 
 Core Features and Benefits
@@ -56,6 +63,7 @@ Core Features and Benefits
         This hybrid approach ensures accurate results across a variety of conditions.
 
 Comparison with Existing Solutions
+
     Commercial systems may offer similar accuracy but come with high costs and proprietary constraints.
     This tool achieves comparable functionality without expensive hardware or complex licensing models.
 
@@ -75,6 +83,7 @@ Technical Implementation
         Processed images and ROI data can be saved and exported to maintain analysis history.
 
 Data Flow
+
     1. Image is uploaded and saved to disk
     2. Thumbnail appears in the main UI
     3. Clicking the thumbnail opens an analysis window
@@ -105,11 +114,13 @@ Development Challenges and Solutions
 Access and Usage
 
 Requirements
+
     Python 3 (tested with versions 3.9.0 through 3.13)
     OpenJDK 8 or 11
     Maven (must be available on the system path)
 
 Installation Instructions
+
     1. Clone the repository
     2. Install dependencies
 
@@ -146,5 +157,6 @@ Contact Information
     Luke Ellister
         Email: luke@hobonanikin.com
         Phone: (541) 968-5465
+
 
 
