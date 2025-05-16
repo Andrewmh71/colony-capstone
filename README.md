@@ -1,27 +1,26 @@
-Low-Cost Bacterial Colony Processing System
+### Low-Cost Bacterial Colony Processing System
 
 An accessible, open-source alternative to expensive commercial colony counting tools.
 
-Team Members
+### Team Members
 
     Luke Ellister
     Andrew Hister
     Timmy Le
     Jose Navarro
 
-Project Timeline / Status
+### Project Timeline / Status
 
     Currently in advanced development.
     Core features are functional and ready for testing and refinement.
 
-Value Proposition
 
-Problem Statement
+### Problem Statement
 
     Accurately analyzing and counting bacterial colonies is a fundamental task in microbiological research.
     However, balancing precision and efficiency presents significant challenges.
 
-Existing Methods
+### Existing Methods
 
     Manual Counting
         Advantages: No additional equipment or software required
@@ -31,22 +30,22 @@ Existing Methods
         Advantages: Fast, consistent, and precise
         Drawbacks: Require expensive hardware and complex proprietary software
 
-The Dilemma
+### The Dilemma
 
     Biologists face two difficult options:
         1. Invest thousands of dollars in commercial automated systems
         2. Rely on manual methods, sacrificing time and productivity
 
-Our Solution
+### Our Solution
 
     This project bridges the gap by offering an accessible, accurate, and user-friendly image analysis tool
     that provides the benefits of automation—without the financial or technical burden.
 
-Target Audience
+### Target Audience
 
     Microbiology researchers and laboratory technicians seeking a cost-effective colony analysis solution.
 
-Core Features and Benefits
+### Core Features and Benefits
 
     Free and Open Source
         No licensing costs. Ideal for research labs with limited budgets.
@@ -62,12 +61,12 @@ Core Features and Benefits
             Noisy or low-contrast images
         This hybrid approach ensures accurate results across a variety of conditions.
 
-Comparison with Existing Solutions
+### Comparison with Existing Solutions
 
     Commercial systems may offer similar accuracy but come with high costs and proprietary constraints.
     This tool achieves comparable functionality without expensive hardware or complex licensing models.
 
-Technical Implementation
+### Technical Implementation
 
     Frontend / UI
         Developed using PyQt6.
@@ -82,7 +81,7 @@ Technical Implementation
         Images are saved to disk to preserve workspace continuity.
         Processed images and ROI data can be saved and exported to maintain analysis history.
 
-Data Flow
+### Data Flow
 
     1. Image is uploaded and saved to disk
     2. Thumbnail appears in the main UI
@@ -92,7 +91,7 @@ Data Flow
     6. ImageJ detects colonies using particle analysis
     7. ROIs can be saved or updated, and results exported as CSV files
 
-Development Challenges and Solutions
+### Development Challenges and Solutions
 
     Petri Dish Detection Performance
         Initial implementation using OpenCV's Hough Circle Transform was inefficient with high-resolution images.
@@ -111,15 +110,14 @@ Development Challenges and Solutions
             ImageJ is now embedded directly into the PyQt interface.
             This improves workflow consistency and user experience.
 
-Access and Usage
 
-Requirements
+### Requirements
 
     Python 3 (tested with versions 3.9.0 through 3.13)
     OpenJDK 8 or 11
     Maven (must be available on the system path)
 
-Installation Instructions
+### Installation Instructions
 
     1. Clone the repository
     2. Install dependencies
@@ -140,7 +138,7 @@ Installation Instructions
         pywin32
         openpyxl
 
-The Graphical User Interace
+### The Graphical User Interace
 
 ![Graphical User Interface](GUI.png)
 
@@ -166,7 +164,7 @@ Export to Excel:  Save data as CSV
 ![Colony Analysis Output Table](Results.png)
 
 
-Contact Information
+### Contact Information
 
     Andrew Hister  
         Email: hisera@oregonstate.edu  
