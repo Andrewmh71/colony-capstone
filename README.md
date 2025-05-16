@@ -139,7 +139,7 @@ Installation Instructions
         matplotlib
         pywin32
         openpyxl
-
+![Graphical User Interface](images/GUI.png)
 Contact Information
 
     Andrew Hister
