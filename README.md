@@ -158,6 +158,9 @@ Save changes:  Save your updated changes to file
 
 Export to Excel:  Save data as CSV
 
+Colony Analysis Output Table
+
+![Colony Analysis Output Table](Results.png)
 
 
 Contact Information
