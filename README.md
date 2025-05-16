@@ -141,22 +141,39 @@ Installation Instructions
         openpyxl
 
 The Graphical User Interace
+
 ![Graphical User Interface](GUI.png)
+
+Add images to workspace:  Upload one or more files
+
+Delete selected image:  Remove selected file and saved data
+
+Analyze:  Start from scratch and analyze the image
+
+Load image from saved file:  Load an image that has already been saved with progress to continue work
+
+Update changes:  Update the manual changes made that are unsaved (insertions/deletions)
+
+Save changes:  Save your updated changes to file
+
+Export to Excel:  Save data as CSV
+
+
 
 Contact Information
 
-    Andrew Hister
-        Email: hisera@oregonstate.edu
+    Andrew Hister  
+        Email: hisera@oregonstate.edu  
         Phone: (503) 828-4461
 
-    Jose Navarro
-        Email: navarrjo@oregonstate.edu
+    Jose Navarro  
+        Email: navarrjo@oregonstate.edu  
         Phone: (503) 602-8891
 
-    Timmy Le
-        Email: letimm@oregonstate.edu
+    Timmy Le  
+        Email: letimm@oregonstate.edu  
         Phone: (503) 734-6018
 
-    Luke Ellister
-        Email: luke@hobonanikin.com
+    Luke Ellister  
+        Email: luke@hobonanikin.com  
         Phone: (541) 968-5465
