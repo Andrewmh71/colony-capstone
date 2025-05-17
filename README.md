@@ -5,7 +5,7 @@ An accessible, open-source alternative to expensive commercial colony counting t
 ### Team Members
 
     Luke Ellister
-    Andrew Hister
+    Andrew Hiser
     Timmy Le
     Jose Navarro
 
@@ -166,7 +166,7 @@ Export to Excel:  Save data as CSV
 
 ### Contact Information
 
-    Andrew Hister  
+    Andrew Hiser  
         Email: hisera@oregonstate.edu  
         Phone: (503) 828-4461
 
