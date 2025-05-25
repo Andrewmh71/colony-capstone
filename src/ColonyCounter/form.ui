@@ -86,7 +86,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Add Images to Workspce</string>
+     <string>Add Images to Workspace</string>
     </property>
    </widget>
    <widget class="QListWidget" name="thumbnailWidget">
