@@ -90,6 +90,7 @@ class ImageUploader(QMainWindow):
                 image_hash = self._get_image_hash(image_path)
                 self.saved_hashes[image_hash] = image_path  # Store the hash and path
 
+    #Hash each uploaded image, so that duplicates cannot be uploaded
     def _get_image_hash(self, image_path):
         """Generate a hash for the given image file"""
         hash_sha256 = hashlib.sha256()
@@ -299,15 +300,7 @@ class MainWindow(QMainWindow):
         self.image_item = None
         self.drawing_enabled = False
 
-        import pandas as pd
-        from pandas import ExcelWriter
-        import openpyxl
-        import tkinter as tk
-        from tkinter import filedialog
-        import re
-
     def export_results(self):
-
         # Read the summary CSV file into a DataFrame
         df_summary = pd.read_csv("final_summary.csv")
 
@@ -388,6 +381,10 @@ class MainWindow(QMainWindow):
 
 
     def on_image_clicked(self, item):
+
+        self.ij.py.run_macro("""
+        run("Clear Results", "");
+        roiManager("Reset");""")
         """Handles click events on the list item."""
         image_path = item.data(Qt.UserRole)  # Retrieve the stored image path
         print(f"Image clicked: {image_path}")  # Debug: Check which image was clicked
@@ -397,6 +394,7 @@ class MainWindow(QMainWindow):
             for elem in self.hwnd:
                     win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
             self.hwnd = []
+
         # Running the macro via ImageJ Python API
 
         # Running the macro via ImageJ Python API
@@ -514,12 +512,26 @@ class MainWindow(QMainWindow):
             cropped_image = cropped_image.dot([0.299, 0.587, 0.114])
             cropped_image = np.clip(cropped_image, 0, 255).astype(np.uint8)
 
+
+            # downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+            # output_path = os.path.join(downloads_dir, "cropped_image.png")
+            # cv2.imwrite(output_path, cropped_image)
+            # print(f"Saved cropped image to: {output_path}")
+
             return cropped_image
         else:
             print("No circles found.")
             return None
 
     def open_image_with_rois(self):
+
+        if self.hwnd:
+            QMessageBox.information(
+                self,
+                "Image Already Loaded",
+                "An image is already loaded. Please close it before opening another."
+            )
+            return
         """Auto-load the ROI set associated with the current image."""
         if not hasattr(self, 'current_image_path') or not self.current_image_path:
             print("No image selected.")
@@ -582,10 +594,14 @@ class MainWindow(QMainWindow):
         run("ROI Manager...");
         roiManager("Reset");
         roiManager("Open", "{roi_path}");
-        roiManager("Show All");
+        //roiManager("Show All");
+        roiManager("Show All with labels");
+        roiManager("Deselect");
+        roiManager("Measure");
+
         """
         self.ij.py.run_macro(macro)
-        self.add_colonies()
+        # self.add_colonies()
 
 
 
@@ -664,7 +680,7 @@ class MainWindow(QMainWindow):
     def add_colonies(self):
 
         macro = """
-        run("Clear Results", "");
+        //run("Clear Results", "");
         roiCount = roiManager("count");
 
         run("Add to Manager");
@@ -698,18 +714,29 @@ class MainWindow(QMainWindow):
             }
         roiCountAfter = roiManager("count"); // Update count
 
-        // Process each split ROI
-        for (i = roiCountAfter - 1; i >= 0; i--) {
-            roiManager("Select", i);
-            roiManager("Measure");
 
-        }
-        for (i = roiCountAfter - 1; i >= roiCount-1; i--) {
-            roiManager("Select", i);
-            run("Add Selection...");
-        }
+        run("Clear Results", "");
         roiManager("Deselect");
-        run("Select None");
+        roiManager("Measure");
+
+
+
+
+
+
+
+        // Process each split ROI
+        //for (i = roiCountAfter - 1; i >= 0; i--) {
+            //roiManager("Select", i);
+            //roiManager("Measure");
+
+       // }
+        //for (i = roiCountAfter - 1; i >= roiCount-1; i--) {
+           // roiManager("Select", i);
+           // run("Add Selection...");
+      // }
+       // roiManager("Deselect");
+       // run("Select None");
     """
 
         self.ij.py.run_macro(macro)
@@ -734,6 +761,15 @@ class MainWindow(QMainWindow):
         return None
 
     def process_image(self):
+
+
+        if self.hwnd:
+            QMessageBox.information(
+                self,
+                "Image Already Loaded",
+                "An image is already loaded. Please close it before opening another."
+            )
+            return
         if self.pixmap is None:
             QMessageBox.information(None, "Error", "No image loaded")
             return
@@ -880,6 +916,15 @@ class MainWindow(QMainWindow):
         self.ij.py.run_macro("run('Watershed');",)
         self.ij.py.run_macro("run('Analyze Particles...', 'size=70-50000 circularity=0.70-1.00 display exclude summarize overlay add');",)
         
+        project_id = self.ui.projectIdInput.text().strip()
+        colony_label = self.ui.colonyIdInput.text().strip()
+
+        if not project_id:
+            project_id = "UNSET"
+        if not colony_label:
+            colony_label = "Unknown"
+
+
         self.ij.py.run_macro("""
             // Save Summary table if open
             if (isOpen("Summary")) {
@@ -903,8 +948,7 @@ class MainWindow(QMainWindow):
     
 
         image_file_name = os.path.basename(self.current_image_path)
-        project_id = "PROJECT_001"
-        colony_label = "PetriDish_A"
+        
 
         try:
             number_of_colonies = int(df_summary.at[0, 'Count'])
@@ -933,9 +977,6 @@ class MainWindow(QMainWindow):
         self.ij.py.run_macro("setTool('freehand');",)
         self.ij.ui().show(imp)
 
-        df_final = pd.read_csv("final_summary.csv")
-        df_final.to_excel("summary_results.xlsx", index=False)
-        print("✅ Summary saved to summary_results.xlsx")
 
 
         hwnd = self.find_imagej_hwnd()
