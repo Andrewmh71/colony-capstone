@@ -302,7 +302,7 @@ class MainWindow(QMainWindow):
 
     def export_results(self):
         # Read the summary CSV file into a DataFrame
-        df_summary = pd.read_csv("final_summary.csv")
+        df_summary = pd.read_csv("app_csv/final_summary.csv")
 
         # Open a file dialog to select the existing Excel file
         root = tk.Tk()
@@ -916,35 +916,36 @@ class MainWindow(QMainWindow):
         self.ij.py.run_macro("run('Watershed');",)
         self.ij.py.run_macro("run('Analyze Particles...', 'size=70-50000 circularity=0.70-1.00 display exclude summarize overlay add');",)
         
+        # grab project ID and colony label from the UI
         project_id = self.ui.projectIdInput.text().strip()
         colony_label = self.ui.colonyIdInput.text().strip()
 
         if not project_id:
             project_id = "UNSET"
         if not colony_label:
-            colony_label = "Unknown"
+            colony_label = "UNSET"
 
 
         self.ij.py.run_macro("""
             // Save Summary table if open
             if (isOpen("Summary")) {
                 selectWindow("Summary");
-                saveAs("Results", "summary_temp.csv");
+                saveAs("Results", "app_csv/summary_temp.csv");
             }
             // Save Results table if open
             if (isOpen("Results")) {
                 selectWindow("Results");
-                saveAs("Results", "results_table.csv");
+                saveAs("Results", "app_csv/results_table.csv");
             }
         """)
-        df_results = pd.read_csv("results_table.csv")
+        df_results = pd.read_csv("app_csv/results_table.csv")
         sizes = df_results["Area"]
         std_dev_size = round(df_results["Area"].std(ddof=1), 3)
 
 
         # Load the CSV into pandas
-        df_summary = pd.read_csv("summary_temp.csv")
-        # copy summary results from csv to excel
+        df_summary = pd.read_csv("app_csv/summary_temp.csv")
+        
     
 
         image_file_name = os.path.basename(self.current_image_path)
@@ -968,7 +969,7 @@ class MainWindow(QMainWindow):
         }])
 
         # Save to final_summary.csv (append if exists)
-        csv_path = "final_summary.csv"
+        csv_path = "app_csv/final_summary.csv"
         if os.path.exists(csv_path):
             final_row.to_csv(csv_path, mode='a', header=False, index=False)
         else:
