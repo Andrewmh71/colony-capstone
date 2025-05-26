@@ -28,8 +28,8 @@
     <property name="geometry">
      <rect>
       <x>210</x>
-      <y>430</y>
-      <width>411</width>
+      <y>520</y>
+      <width>300</width>
       <height>41</height>
      </rect>
     </property>
@@ -37,17 +37,30 @@
      <string>Analyze</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="addBacteriaButton">
+   <widget class="QLineEdit" name="projectIdInput">
     <property name="geometry">
      <rect>
-      <x>790</x>
-      <y>10</y>
-      <width>121</width>
-      <height>31</height>
+      <x>210</x>
+      <y>440</y>
+      <width>300</width>
+      <height>30</height>
      </rect>
     </property>
-    <property name="text">
-     <string> Update Changes</string>
+    <property name="placeholderText">
+     <string>Enter Project ID</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="colonyIdInput">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>480</y>
+      <width>300</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>Enter Colony Label</string>
     </property>
    </widget>
    <widget class="QPushButton" name="saveImageButton">
@@ -104,12 +117,12 @@
      <rect>
       <x>20</x>
       <y>20</y>
-      <width>141</width>
+      <width>71</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string> Delete Selected Image</string>
+     <string>Delete 1</string>
     </property>
    </widget>
    <widget class="QWidget" name="centralwidget_2" native="true">
@@ -125,7 +138,7 @@
    <widget class="QPushButton" name="excelButton">
     <property name="geometry">
      <rect>
-      <x>910</x>
+      <x>880</x>
       <y>10</y>
       <width>111</width>
       <height>31</height>
@@ -133,6 +146,32 @@
     </property>
     <property name="text">
      <string>Export To Excel</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="deleteColonies">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>10</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delete Selection</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="deleteAll">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>20</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clear All</string>
     </property>
    </widget>
   </widget>
