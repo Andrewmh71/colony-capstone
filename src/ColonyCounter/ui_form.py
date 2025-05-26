@@ -15,8 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QGraphicsView, QListWidget, QListWidgetItem,
-    QMainWindow, QPushButton, QSizePolicy, QStatusBar, QWidget, QLineEdit)
+from PySide6.QtWidgets import (QApplication, QGraphicsView, QLineEdit, QListWidget,
+    QListWidgetItem, QMainWindow, QPushButton, QSizePolicy,
+    QStatusBar, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -30,16 +31,13 @@ class Ui_MainWindow(object):
         self.imageContainer.setGeometry(QRect(210, 50, 411, 381))
         self.analyzeButton = QPushButton(self.centralwidget)
         self.analyzeButton.setObjectName(u"analyzeButton")
-        self.analyzeButton.setGeometry(QRect(210, 520, 411, 41))
-        self.addBacteriaButton = QPushButton(self.centralwidget)
+        self.analyzeButton.setGeometry(QRect(210, 520, 300, 41))
         self.projectIdInput = QLineEdit(self.centralwidget)
         self.projectIdInput.setObjectName(u"projectIdInput")
         self.projectIdInput.setGeometry(QRect(210, 440, 300, 30))
         self.colonyIdInput = QLineEdit(self.centralwidget)
         self.colonyIdInput.setObjectName(u"colonyIdInput")
         self.colonyIdInput.setGeometry(QRect(210, 480, 300, 30))
-        self.addBacteriaButton.setObjectName(u"addBacteriaButton")
-        self.addBacteriaButton.setGeometry(QRect(790, 10, 121, 31))
         self.saveImageButton = QPushButton(self.centralwidget)
         self.saveImageButton.setObjectName(u"saveImageButton")
         self.saveImageButton.setGeometry(QRect(690, 10, 101, 31))
@@ -54,13 +52,19 @@ class Ui_MainWindow(object):
         self.thumbnailWidget.setGeometry(QRect(20, 50, 141, 431))
         self.DeleteButton = QPushButton(self.centralwidget)
         self.DeleteButton.setObjectName(u"DeleteButton")
-        self.DeleteButton.setGeometry(QRect(20, 20, 141, 31))
+        self.DeleteButton.setGeometry(QRect(20, 20, 71, 31))
         self.centralwidget_2 = QWidget(self.centralwidget)
         self.centralwidget_2.setObjectName(u"centralwidget_2")
         self.centralwidget_2.setGeometry(QRect(690, 40, 521, 451))
         self.excelButton = QPushButton(self.centralwidget)
         self.excelButton.setObjectName(u"excelButton")
-        self.excelButton.setGeometry(QRect(910, 10, 111, 31))
+        self.excelButton.setGeometry(QRect(880, 10, 111, 31))
+        self.deleteColonies = QPushButton(self.centralwidget)
+        self.deleteColonies.setObjectName(u"deleteColonies")
+        self.deleteColonies.setGeometry(QRect(790, 10, 91, 31))
+        self.deleteAll = QPushButton(self.centralwidget)
+        self.deleteAll.setObjectName(u"deleteAll")
+        self.deleteAll.setGeometry(QRect(90, 20, 71, 31))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -76,11 +80,12 @@ class Ui_MainWindow(object):
         self.analyzeButton.setText(QCoreApplication.translate("MainWindow", u"Analyze", None))
         self.projectIdInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Enter Project ID", None))
         self.colonyIdInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Enter Colony Label", None))
-        self.addBacteriaButton.setText(QCoreApplication.translate("MainWindow", u" Update Changes", None))
         self.saveImageButton.setText(QCoreApplication.translate("MainWindow", u"Save Progress", None))
         self.loadImageButton.setText(QCoreApplication.translate("MainWindow", u"Load Image From Save File", None))
-        self.addFolderButton.setText(QCoreApplication.translate("MainWindow", u"Add Images to Workspce", None))
-        self.DeleteButton.setText(QCoreApplication.translate("MainWindow", u" Delete Selected Image", None))
+        self.addFolderButton.setText(QCoreApplication.translate("MainWindow", u"Add Images to Workspace", None))
+        self.DeleteButton.setText(QCoreApplication.translate("MainWindow", u"Delete 1", None))
         self.excelButton.setText(QCoreApplication.translate("MainWindow", u"Export To Excel", None))
+        self.deleteColonies.setText(QCoreApplication.translate("MainWindow", u"Delete Selection", None))
+        self.deleteAll.setText(QCoreApplication.translate("MainWindow", u"Clear All", None))
     # retranslateUi
 

@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QMessageBox, QGraphicsEllipseItem, QGraphicsItem, QGraphicsRectItem, QSlider, QInputDialog,  QVBoxLayout,  QSizePolicy
 from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath, QIcon, QWindow
+from PySide6.QtGui import QShortcut, QKeySequence
 import time
 from PySide6.QtCore import Qt, QRectF, QSize
 from ui_form import Ui_MainWindow
@@ -143,6 +144,18 @@ class ImageUploader(QMainWindow):
             QMessageBox.information(None, "Images Saved", f"Images have been successfully saved to: {self.app_folder}")
         return saved_images  # List of saved image paths
 
+
+
+
+
+
+
+
+
+
+
+
+
     def load_images_into_widget(self):
         """Load the images from the folder into the list widget"""
         for image_hash, image_path in self.saved_hashes.items():
@@ -167,6 +180,8 @@ class ImageUploader(QMainWindow):
 
         # Connect the itemClicked signal to the handler after adding the items
         self.image_list_widget.itemClicked.connect(self.on_image_clicked)
+
+
 
     def on_image_clicked(self, item):
         """Handle the click on an image item in the list"""
@@ -211,17 +226,34 @@ class ImageUploader(QMainWindow):
 class MainWindow(QMainWindow):
 
     def display_thumbnails(self, image_paths):
-           """Displays thumbnails of the images in the QListWidget."""
-           self.ui.thumbnailWidget.clear()
-           for path in image_paths:
-               item = QListWidgetItem()
-               pixmap = QPixmap(path).scaled(100, 100, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-               icon = QIcon(pixmap)
-               item.setIcon(icon)
-               item.setText(os.path.basename(path))
-               item.setSizeHint(QSize(120, 120))  # Add some padding
-               item.setData(Qt.UserRole, path)  # Store the image path as custom data
-               self.ui.thumbnailWidget.addItem(item)
+        """Displays thumbnails of the images in the QListWidget."""
+        self.ui.thumbnailWidget.clear()
+        for path in image_paths:
+            item = QListWidgetItem()
+
+            # Load with QPixmap first; if fails (e.g. HEIC), fallback to Pillow
+            pixmap = QPixmap(path)
+            if pixmap.isNull():
+                # Try loading with Pillow if QPixmap fails (common with HEIC)
+                try:
+                    from PIL import Image
+                    pil_img = Image.open(path)
+                    pil_img.thumbnail((100, 100))
+                    pil_img = pil_img.convert("RGBA")
+                    data = pil_img.tobytes("raw", "RGBA")
+                    qimage = QImage(data, pil_img.width, pil_img.height, QImage.Format.Format_RGBA8888)
+                    pixmap = QPixmap.fromImage(qimage)
+                except Exception as e:
+                    print(f"Failed to load image {path}: {e}")
+                    continue
+
+            pixmap = pixmap.scaled(100, 100, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            icon = QIcon(pixmap)
+            item.setIcon(icon)
+            item.setText(os.path.basename(path))
+            item.setSizeHint(QSize(120, 120))  # Add some padding
+            item.setData(Qt.UserRole, path)  # Store the image path as custom data
+            self.ui.thumbnailWidget.addItem(item)
 
 
 
@@ -283,15 +315,16 @@ class MainWindow(QMainWindow):
         # Connect the save button to save the cropped image
         self.ui.saveImageButton.clicked.connect(self.save_results)
         self.ui.excelButton.clicked.connect(self.export_results)
+        self.ui.deleteColonies.clicked.connect(self.delete_colonies)
 
-        self.ui.addBacteriaButton.clicked.connect(self.add_colonies)
+
 
         # self.ui.nextButton.clicked.connect(self.next_image)
         self.ui.loadImageButton.clicked.connect(self.open_image_with_rois)
         self.ui.addFolderButton.clicked.connect(self.upload_images)
 
         self.ui.DeleteButton.clicked.connect(self.delete_image)
-
+        self.ui.deleteAll.clicked.connect(self.delete_all_images)
 
         self.pixmap = None
         self.file_path = None
@@ -300,35 +333,153 @@ class MainWindow(QMainWindow):
         self.image_item = None
         self.drawing_enabled = False
 
+
     def export_results(self):
-        # Read the summary CSV file into a DataFrame
-        df_summary = pd.read_csv("final_summary.csv")
 
-        # Open a file dialog to select the existing Excel file
-        root = tk.Tk()
-        root.withdraw()  # Hide the root window
-        file_path = filedialog.askopenfilename(title="Select an Excel file", filetypes=[("Excel files", "*.xlsx;*.xls")])
+        if self.hwnd:
 
-        if not file_path:
-            print("No file selected.")
-            return
+            # Read the summary CSV file into a DataFrame
+            df_summary = pd.read_csv("final_summary.csv")
 
-        # Extract the file name from current image path
-        match = re.search(r'[^/\\]+$', self.current_image_path)
+            # Open a file dialog to select the existing Excel file
+            root = tk.Tk()
+            root.withdraw()  # Hide the root window
+            file_path = filedialog.askopenfilename(title="Select an Excel file", filetypes=[("Excel files", "*.xlsx;*.xls")])
 
-        if match:
-            # Get the matched file name for the sheet name
-            sheet_name = match.group(0)  # Extracted file name as the sheet name
+            if not file_path:
+                print("No file selected.")
+                return
 
-            try:
-                # Try to open the existing Excel file to append a new sheet
-                with ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
-                    df_summary.to_excel(writer, sheet_name=sheet_name, index=False)
-                print(f"Summary saved to {file_path} in sheet '{sheet_name}'")
-            except FileNotFoundError:
-                print(f"File not found: {file_path}")
+            # Extract the file name from current image path
+            match = re.search(r'[^/\\]+$', self.current_image_path)
+
+            if match:
+                # Get the matched file name for the sheet name
+                sheet_name = match.group(0)  # Extracted file name as the sheet name
+
+                try:
+                    # Try to open the existing Excel file to append a new sheet
+                    with ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
+                        df_summary.to_excel(writer, sheet_name=sheet_name, index=False)
+                    print(f"Summary saved to {file_path} in sheet '{sheet_name}'")
+                except FileNotFoundError:
+                    print(f"File not found: {file_path}")
+            else:
+                print("No image selected")
         else:
-            print("No image selected")
+             return
+
+
+
+    def delete_colonies(self):
+
+        if not hasattr(self, 'current_image_path') or not self.current_image_path:
+            print("No image selected.")
+            return
+        macro = """
+        run("ROI Manager...");
+        roiCountBefore = roiManager("count");
+        run("Add to Manager");
+        roiCountAfter = roiManager("count");
+
+        if (roiCountAfter == roiCountBefore) {
+            return;
+        } else {
+            roiManager("Deselect");
+            roiManager("Select", roiCountAfter - 1);
+            getSelectionCoordinates(xNew, yNew);
+
+            for (i = roiCountAfter - 2; i >= 0; i--) {
+                roiManager("Select", i);
+                getSelectionCoordinates(xOld, yOld);
+
+                inside = true;
+                for (j = 0; j < xOld.length; j++) {
+                    if (!pointInPolygon(xOld[j], yOld[j], xNew, yNew)) {
+                        inside = false;
+                        break;
+                    }
+                }
+
+                if (inside) {
+                    roiManager("Delete");
+                }
+            }
+
+            roiCountFinal = roiManager("count");
+            roiManager("Select", roiCountFinal - 1);
+            roiManager("Delete");
+        }
+
+        function pointInPolygon(px, py, polyX, polyY) {
+            crossings = 0;
+            n = polyX.length;
+            for (i = 0; i < n; i++) {
+                j = (i + 1) % n;
+                if (((polyY[i] > py) != (polyY[j] > py)) &&
+                    (px < (polyX[j] - polyX[i]) * (py - polyY[i]) / (polyY[j] - polyY[i]) + polyX[i])) {
+                    crossings++;
+                }
+            }
+            return (crossings % 2 == 1);
+        }
+        """
+        self.ij.py.run_macro(macro)
+
+
+
+    def delete_all_images(self):
+        """Delete all images and their associated ROI and CSV data."""
+        reply = QMessageBox.question(
+            self,
+            "Delete All Data",
+            "Are you sure you want to delete all images and associated ROI and CSV data?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                # Define directories
+                app_images_dir = os.path.join(os.getcwd(), 'app_images')
+                app_ROI_dir = os.path.join(os.getcwd(), 'app_ROI')
+                app_csv_dir = os.path.join(os.getcwd(), 'app_csv')
+
+                # Delete contents of each directory
+                for dir_path in [app_images_dir, app_ROI_dir, app_csv_dir]:
+                    if os.path.exists(dir_path):
+                        for filename in os.listdir(dir_path):
+                            file_path = os.path.join(dir_path, filename)
+                            try:
+                                if os.path.isfile(file_path) or os.path.islink(file_path):
+                                    os.unlink(file_path)
+                                elif os.path.isdir(file_path):
+                                    shutil.rmtree(file_path)
+                            except Exception as e:
+                                raise Exception(f"Failed to delete {file_path}: {e}")
+
+                QMessageBox.information(self, "Success", "All images and associated data have been deleted.")
+
+                self.image_uploader.saved_hashes = {}
+                self.image_uploader.load_images_into_widget()
+                all_images = self.image_uploader.get_all_images()
+                self.display_thumbnails(all_images)
+                # Clear current image display
+                self.scene.clear()
+                self.current_image_path = None
+                self.pixmap = None
+
+                QMessageBox.information(self, "Deleted", "Image and associated ROI (if any) deleted successfully.")
+
+
+                if self.hwnd:
+                    print(self.hwnd)
+                    for elem in self.hwnd:
+                            win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
+                    self.hwnd = []
+
+
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"An error occurred while deleting: {e}")
 
 
     def delete_image(self):
@@ -373,6 +524,13 @@ class MainWindow(QMainWindow):
                 # Clear current image display
                 self.scene.clear()
                 self.current_image_path = None
+                self.pixmap = None
+
+                if self.hwnd:
+                    print(self.hwnd)
+                    for elem in self.hwnd:
+                            win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
+                    self.hwnd = []
 
                 QMessageBox.information(self, "Deleted", "Image and associated ROI (if any) deleted successfully.")
 
@@ -394,6 +552,7 @@ class MainWindow(QMainWindow):
             for elem in self.hwnd:
                     win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
             self.hwnd = []
+
 
         # Running the macro via ImageJ Python API
 
@@ -452,6 +611,7 @@ class MainWindow(QMainWindow):
         if not hasattr(self, 'current_image_path') or not self.current_image_path:
             print("No image selected.")
             return
+        self.add_colonies();
 
         # Extract image filename without extension
         image_name = os.path.splitext(os.path.basename(self.current_image_path))[0]
@@ -476,7 +636,198 @@ class MainWindow(QMainWindow):
         self.ij.py.run_macro(macro)
         print(f"ROI saved to {file_path}")
 
+
+
+
+
+
+
+
+
+
+    def open_image_with_rois(self):
+
+       if self.hwnd:
+           QMessageBox.information(
+               self,
+               "Image Already Loaded",
+               "An image is already loaded. Please close it before opening another."
+           )
+           return
+       """Auto-load the ROI set associated with the current image."""
+       if not hasattr(self, 'current_image_path') or not self.current_image_path:
+           print("No image selected.")
+           return
+
+       image_path = self.current_image_path.replace("\\", "/")
+       image_name = os.path.basename(image_path)
+       image_stem = os.path.splitext(image_name)[0]
+       roi_dir = os.path.join(os.path.dirname(image_path), "../app_ROI")
+       roi_dir = os.path.abspath(roi_dir)
+       roi_path = os.path.join(roi_dir, f"{image_stem}_ROI.zip").replace("\\", "/")
+
+       if not os.path.exists(image_path):
+           print("Image file does not exist.")
+           return
+
+       if not os.path.exists(roi_path):
+           print(f"ROI file not found: {roi_path}")
+           return
+
+       # Load image as array with OpenCV
+       qimage = self.pixmap.toImage()
+
+       # Convert QImage to numpy array
+       width = qimage.width()
+       height = qimage.height()
+       channels = 4  # Assuming RGBA format
+       ptr = qimage.bits()
+       arr = np.array(ptr).reshape(height, width, channels)
+       # image = arr
+
+       # Run preprocessing only
+       cropped = self.preprocess_image(arr)
+       if cropped is None:
+           print("Preprocessing failed.")
+           return
+
+       # Convert to ImageJ image and show
+       imp = self.ij.py.to_java(cropped)
+       self.ij.ui().show(imp)
+       hwnd = self.find_imagej_hwnd()
+       if hwnd:
+           print(f"Found ImageJ HWND: {hwnd}")
+           self.hwnd.append(hwnd)
+           try:
+               win = QWindow.fromWinId(hwnd)  # Convert hwnd to QWindow
+               container = self.createWindowContainer(win)  # Create a container for QWindow
+
+               # Parent the container to centralwidget_2
+               self.container = container
+               self.container.setParent(self.ui.centralwidget_2)
+
+               # Set the geometry to match the parent widget's size (top-left)
+               self.container.setGeometry(self.ui.centralwidget_2.rect())  # Fills the space
+               self.container.show()
+
+           except Exception as e:
+               print(f"Error embedding ImageJ window: {e}")
+       else:
+           print("Failed to find ImageJ window")
+
+       self.ij.py.run_macro("setTool('freehand');",)
+       # Open ROIs
+       macro = f"""
+       run("ROI Manager...");
+       roiManager("Reset");
+       roiManager("Open", "{roi_path}");
+       //roiManager("Show All");
+       roiManager("Show All with labels");
+       roiManager("Deselect");
+       roiManager("Measure");
+
+       """
+       self.ij.py.run_macro(macro)
+       # self.add_colonies()
+
+
+
+
+
+
+
+
+    def add_colonies(self):
+
+
+        macro = """
+        //run("Clear Results", "");
+        roiCount = roiManager("count");
+
+        run("Add to Manager");
+
+
+        if (!isOpen("ROI Manager")) {
+            run("ROI Manager...");
+        }
+
+        roiCount = roiManager("count");
+        roiManager("Select", roiCount - 1);
+
+        // Debug: Print selection type
+        isComposite = (selectionType() == 9); // Check for composite selection
+
+        if (isComposite) {
+            roiManager("Split");
+            wait(200); // Give time for processing
+        }
+
+        // Get the updated ROI count
+        roiCountAfter = roiManager("count");
+
+        if (!isComposite) {
+            // Process single ROI directly
+            roiManager("Select", roiCount - 1);
+            run("Add Selection...");
+        } else {
+            // Remove original composite ROI
+            roiManager("Select", roiCount - 1);
+            roiManager("Delete");
+            }
+        roiCountAfter = roiManager("count"); // Update count
+
+
+        run("Clear Results", "");
+        roiManager("Deselect");
+        roiManager("Measure");
+        // Process each split ROI
+        //for (i = roiCountAfter - 1; i >= 0; i--) {
+            //roiManager("Select", i);
+            //roiManager("Measure");
+
+       // }
+        //for (i = roiCountAfter - 1; i >= roiCount-1; i--) {
+           // roiManager("Select", i);
+           // run("Add Selection...");
+      // }
+       // roiManager("Deselect");
+       // run("Select None");
+    """
+
+        self.ij.py.run_macro(macro)
+
+    def find_imagej_hwnd(self, timeout=5.0):
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            def enum_handler(hwnd, result):
+                title = win32gui.GetWindowText(hwnd)
+                try:
+                    print(f"Window title: {title}")  # For debugging
+                except UnicodeEncodeError:
+                    print(f"Window title (unicode error): {title.encode('ascii', 'ignore').decode('ascii')}")
+                if "(V)" in title:
+                    result.append(hwnd)
+
+            hwnds = []
+            win32gui.EnumWindows(enum_handler, hwnds)
+            if hwnds:
+                return hwnds[0]
+
+        return None
+
+
+
+
+
+
+
+
+
     def preprocess_image(self, arr):
+
+
+
+
         if arr.shape[2] == 4:
             arr = arr[:, :, :3]
 
@@ -523,242 +874,10 @@ class MainWindow(QMainWindow):
             print("No circles found.")
             return None
 
-    def open_image_with_rois(self):
-
-        if self.hwnd:
-            QMessageBox.information(
-                self,
-                "Image Already Loaded",
-                "An image is already loaded. Please close it before opening another."
-            )
-            return
-        """Auto-load the ROI set associated with the current image."""
-        if not hasattr(self, 'current_image_path') or not self.current_image_path:
-            print("No image selected.")
-            return
-
-        image_path = self.current_image_path.replace("\\", "/")
-        image_name = os.path.basename(image_path)
-        image_stem = os.path.splitext(image_name)[0]
-        roi_dir = os.path.join(os.path.dirname(image_path), "../app_ROI")
-        roi_dir = os.path.abspath(roi_dir)
-        roi_path = os.path.join(roi_dir, f"{image_stem}_ROI.zip").replace("\\", "/")
-
-        if not os.path.exists(image_path):
-            print("Image file does not exist.")
-            return
-
-        if not os.path.exists(roi_path):
-            print(f"ROI file not found: {roi_path}")
-            return
-
-        # Load image as array with OpenCV
-        arr = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-        if arr is None:
-            print("Failed to read image as array")
-            return
-
-        # Run preprocessing only
-        cropped = self.preprocess_image(arr)
-        if cropped is None:
-            print("Preprocessing failed.")
-            return
-
-        # Convert to ImageJ image and show
-        imp = self.ij.py.to_java(cropped)
-        self.ij.ui().show(imp)
-        hwnd = self.find_imagej_hwnd()
-        if hwnd:
-            print(f"Found ImageJ HWND: {hwnd}")
-            self.hwnd.append(hwnd)
-            try:
-                win = QWindow.fromWinId(hwnd)  # Convert hwnd to QWindow
-                container = self.createWindowContainer(win)  # Create a container for QWindow
-
-                # Parent the container to centralwidget_2
-                self.container = container
-                self.container.setParent(self.ui.centralwidget_2)
-
-                # Set the geometry to match the parent widget's size (top-left)
-                self.container.setGeometry(self.ui.centralwidget_2.rect())  # Fills the space
-                self.container.show()
-
-            except Exception as e:
-                print(f"Error embedding ImageJ window: {e}")
-        else:
-            print("Failed to find ImageJ window")
-
-        self.ij.py.run_macro("setTool('freehand');",)
-        # Open ROIs
-        macro = f"""
-        run("ROI Manager...");
-        roiManager("Reset");
-        roiManager("Open", "{roi_path}");
-        //roiManager("Show All");
-        roiManager("Show All with labels");
-        roiManager("Deselect");
-        roiManager("Measure");
-
-        """
-        self.ij.py.run_macro(macro)
-        # self.add_colonies()
-
-
-
-    def open_image_dialog(self):
-        # Show file dialog with image filter (including HEIC) for multiple files
-        file_paths, _ = QFileDialog.getOpenFileNames(
-            self,
-            "Open Images",
-            "",
-            "Images (*.png *.jpg *.jpeg *.bmp *.gif *.heic)"
-        )
-
-        if file_paths:
-            self.file_paths = file_paths  # Store selected file paths
-            self.current_image_index = 0  # Set initial index to 0
-            print(f"Loaded {len(self.file_paths)} images.")  # Debug: Check number of images
-            self.process_batch()  # Process the first image
-
-
-
-    def process_batch(self):
-        """Loads and displays the current image from the file paths stored in self.file_paths"""
-        if not self.file_paths:  # Check if there are no files
-            print("No images to process.")  # Debug: No files loaded
-            return  # Exit early if there are no file paths to process
-
-        # Get the current image path based on the current index
-        current_image_path = self.file_paths[self.current_image_index]
-        print(f"Processing {current_image_path}")  # Debug: Check which image is being processed
-
-        # Load the image using Pillow (with pillow-heif support)
-        image = Image.open(current_image_path)
-
-        # Convert the image to QPixmap to display in the QGraphicsView
-        image = image.convert("RGB")  # Ensure it's in RGB mode
-        data = image.tobytes("raw", "RGB")  # Convert to raw byte data
-        qim = QImage(data, image.width, image.height, image.width * 3, QImage.Format_RGB888)
-
-        # Convert QImage to QPixmap
-        pixmap = QPixmap.fromImage(qim)
-
-        if pixmap.isNull():
-            print("Failed to load image!")  # Debug: Image not loaded properly
-            return
-
-        # Clear any existing items in the scene
-        self.scene.clear()
-
-        # Create a QGraphicsPixmapItem with the selected image and add it to the scene
-        self.image_item = QGraphicsPixmapItem(pixmap)
-        self.scene.addItem(self.image_item)
-
-        # Fit the image to the QGraphicsView initially
-        self.image_container.fitInView(self.image_item, Qt.KeepAspectRatio)
-
-        # Store the pixmap for potential future use
-        self.pixmap = pixmap
-
-
-    def next_image(self):
-        """Displays the next image in the file path list."""
-        if self.current_image_index < len(self.file_paths) - 1:
-            self.current_image_index += 1  # Move to the next image
-            print(f"Moving to next image. Index: {self.current_image_index}")  # Debug: Check index
-            self.process_batch()  # Process and display the next image
-        else:
-            print("All images processed!")  # Debug: End of list
-    def enable_ellipse_drawing(self):
-        if self.image_item:
-            self.drawing_enabled = True
-            rect = QRectF(0, 0, 100, 100)
-            self.ellipse_item = EllipseItem(rect)
-            self.scene.addItem(self.ellipse_item)
-
-
-    def add_colonies(self):
-
-        macro = """
-        //run("Clear Results", "");
-        roiCount = roiManager("count");
-
-        run("Add to Manager");
-
-        if (!isOpen("ROI Manager")) {
-            run("ROI Manager...");
-        }
-
-        roiCount = roiManager("count");
-        roiManager("Select", roiCount - 1);
-
-        // Debug: Print selection type
-        isComposite = (selectionType() == 9); // Check for composite selection
-
-        if (isComposite) {
-            roiManager("Split");
-            wait(200); // Give time for processing
-        }
-
-        // Get the updated ROI count
-        roiCountAfter = roiManager("count");
-
-        if (!isComposite) {
-            // Process single ROI directly
-            roiManager("Select", roiCount - 1);
-            run("Add Selection...");
-        } else {
-            // Remove original composite ROI
-            roiManager("Select", roiCount - 1);
-            roiManager("Delete");
-            }
-        roiCountAfter = roiManager("count"); // Update count
-
-
-        run("Clear Results", "");
-        roiManager("Deselect");
-        roiManager("Measure");
 
 
 
 
-
-
-
-        // Process each split ROI
-        //for (i = roiCountAfter - 1; i >= 0; i--) {
-            //roiManager("Select", i);
-            //roiManager("Measure");
-
-       // }
-        //for (i = roiCountAfter - 1; i >= roiCount-1; i--) {
-           // roiManager("Select", i);
-           // run("Add Selection...");
-      // }
-       // roiManager("Deselect");
-       // run("Select None");
-    """
-
-        self.ij.py.run_macro(macro)
-
-    def find_imagej_hwnd(self, timeout=5.0):
-        start_time = time.time()
-        while time.time() - start_time < timeout:
-            def enum_handler(hwnd, result):
-                title = win32gui.GetWindowText(hwnd)
-                try:
-                    print(f"Window title: {title}")  # For debugging
-                except UnicodeEncodeError:
-                    print(f"Window title (unicode error): {title.encode('ascii', 'ignore').decode('ascii')}")
-                if "(V)" in title:
-                    result.append(hwnd)
-
-            hwnds = []
-            win32gui.EnumWindows(enum_handler, hwnds)
-            if hwnds:
-                return hwnds[0]
-            time.sleep(0.1)
-        return None
 
     def process_image(self):
 
@@ -894,7 +1013,7 @@ class MainWindow(QMainWindow):
         # self.ij.py.run_macro(macro)
         self.ij.ui().show(imp)
 
-        time.sleep(1)  # Give time to draw
+        # time.sleep(1)  # Give time to draw
 
 
 
