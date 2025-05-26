@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsP
 from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath, QIcon, QWindow
 from PySide6.QtGui import QShortcut, QKeySequence
 import time
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QRectF, QSize
 from ui_form import Ui_MainWindow
 from customGraphicsView import ImageGraphicsView
 import sys
@@ -11,16 +11,28 @@ import numpy as np
 import imagej
 import scyjava as sj
 import os
+from sklearn.cluster import DBSCAN
+import imageio
 from PIL import Image
 import pillow_heif
+from scipy import ndimage as ndi
+from skimage.feature import peak_local_max
+from skimage.segmentation import watershed
+from skimage.morphology import label
+# from jnius import autoclass
 import scyjava
+from scyjava import jimport
+import matplotlib.pyplot as plt
 import shutil
 import hashlib
-from PySide6.QtWidgets import QListWidget, QListWidgetItem,  QWidget
+from PySide6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
+import psutil
 import win32gui
+import time
 import win32con
 import pandas as pd
 from pandas import ExcelWriter
+import openpyxl
 import tkinter as tk
 from tkinter import filedialog
 import re
@@ -307,6 +319,7 @@ class MainWindow(QMainWindow):
 
 
 
+        # self.ui.nextButton.clicked.connect(self.next_image)
         self.ui.loadImageButton.clicked.connect(self.open_image_with_rois)
         self.ui.addFolderButton.clicked.connect(self.upload_images)
 
@@ -583,6 +596,9 @@ class MainWindow(QMainWindow):
        self.pixmap = pixmap
 
 
+
+
+
     def upload_images(self):
         saved_images = self.image_uploader.upload_images()
         if saved_images:
@@ -847,6 +863,12 @@ class MainWindow(QMainWindow):
             cropped_image = cropped_image.dot([0.299, 0.587, 0.114])
             cropped_image = np.clip(cropped_image, 0, 255).astype(np.uint8)
 
+
+            # downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+            # output_path = os.path.join(downloads_dir, "cropped_image.png")
+            # cv2.imwrite(output_path, cropped_image)
+            # print(f"Saved cropped image to: {output_path}")
+
             return cropped_image
         else:
             print("No circles found.")
@@ -940,6 +962,8 @@ class MainWindow(QMainWindow):
                 # If we found a most centered circle, crop the image inside the circle
                 if most_centered_circle:
                     x, y, r = most_centered_circle
+                    output_image = arr.copy()
+
                     # Step 5: Create a mask for the circle
                     mask = np.zeros_like(arr)
                     cv2.circle(mask, (x, y), r, (255, 255, 255), -1)  # White circle on black background
@@ -1010,7 +1034,7 @@ class MainWindow(QMainWindow):
 
         self.ij.py.run_macro("run('Watershed');",)
         self.ij.py.run_macro("run('Analyze Particles...', 'size=70-50000 circularity=0.70-1.00 display exclude summarize overlay add');",)
-        
+
         project_id = self.ui.projectIdInput.text().strip()
         colony_label = self.ui.colonyIdInput.text().strip()
 
@@ -1040,10 +1064,10 @@ class MainWindow(QMainWindow):
         # Load the CSV into pandas
         df_summary = pd.read_csv("summary_temp.csv")
         # copy summary results from csv to excel
-    
+
 
         image_file_name = os.path.basename(self.current_image_path)
-        
+
 
         try:
             number_of_colonies = int(df_summary.at[0, 'Count'])
