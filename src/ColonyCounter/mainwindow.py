@@ -36,22 +36,27 @@ import openpyxl
 import tkinter as tk
 from tkinter import filedialog
 import re
-
+import json
+from openpyxl import Workbook, load_workbook
 
 
 
 pillow_heif.register_heif_opener()
 
 
+
+
 class ImageUploader(QMainWindow):
     def __init__(self, app_folder="app_images"):
         super().__init__()
-
         self.app_folder = app_folder
         self.saved_hashes = {}  # Dictionary to store hashes of saved images with the corresponding file path
+        self.metadata_path = "metadata/saved_hashes.json"
+
 
         # Load existing hashes from the folder if any
-        self._load_existing_hashes()
+        # self._load_existing_hashes()
+        self.load_metadata()
 
         if not os.path.exists(self.app_folder):
             os.makedirs(self.app_folder)
@@ -78,10 +83,18 @@ class ImageUploader(QMainWindow):
         container = QWidget()
         container.setLayout(layout)
         self.setCentralWidget(container)
-
+    def load_metadata(self):
+            """Load saved_hashes from metadata JSON file."""
+            if os.path.exists(self.metadata_path):
+                try:
+                    with open(self.metadata_path, "r") as f:
+                        self.saved_hashes = json.load(f)
+                except Exception as e:
+                    print(f"Failed to load saved_hashes: {e}")
+            else:
+                print("No saved_hashes metadata found, starting fresh.")
     def get_all_images(self):
-        """Return all saved image paths"""
-        return list(self.saved_hashes.values())
+        return [meta["path"] for meta in self.saved_hashes.values()]
 
     def _load_existing_hashes(self):
         """Load the hashes of images already in the app folder"""
@@ -89,8 +102,11 @@ class ImageUploader(QMainWindow):
             image_path = os.path.join(self.app_folder, image_name)
             if os.path.isfile(image_path):
                 image_hash = self._get_image_hash(image_path)
-                self.saved_hashes[image_hash] = image_path  # Store the hash and path
-
+                self.saved_hashes[image_hash] = {
+                    "path": image_path,
+                    "project_id": None,
+                    "colony_label": None
+                }
     #Hash each uploaded image, so that duplicates cannot be uploaded
     def _get_image_hash(self, image_path):
         """Generate a hash for the given image file"""
@@ -116,7 +132,7 @@ class ImageUploader(QMainWindow):
 
                 # Check if the image hash already exists
                 if image_hash in self.saved_hashes:
-                    existing_image = self.saved_hashes[image_hash]  # Get the existing image path
+                    existing_image = self.saved_hashes[image_hash]["path"]  # Get the existing image path
                     print(f"Image {os.path.basename(image_path)} is already saved as {os.path.basename(existing_image)}.")
                     continue  # Skip this image as it is a duplicate based on content
 
@@ -134,36 +150,46 @@ class ImageUploader(QMainWindow):
                         counter += 1
 
                 shutil.copy(image_path, saved_path)
-                self.saved_hashes[image_hash] = saved_path  # Store the hash and path of the saved image
+                self.saved_hashes[image_hash] = {
+                    "path": saved_path,
+                    "project_id": None,
+                    "colony_label": None
+                }
                 saved_images.append(saved_path)
 
             except Exception as e:
                 QMessageBox.warning(None, "Error", f"Failed to save image {image_path}: {str(e)}")
 
+        # Save the updated saved_hashes dict to the JSON file in metadata folder
         if saved_images:
+            import json
+            metadata_dir = "metadata"
+            os.makedirs(metadata_dir, exist_ok=True)
+            metadata_path = os.path.join(metadata_dir, "saved_hashes.json")
+
+            try:
+                with open(metadata_path, "w") as f:
+                    json.dump(self.saved_hashes, f, indent=4)
+                print(f"Saved hashes metadata to {metadata_path}")
+            except Exception as e:
+                QMessageBox.warning(None, "Error", f"Failed to save metadata JSON file: {str(e)}")
+
             QMessageBox.information(None, "Images Saved", f"Images have been successfully saved to: {self.app_folder}")
+
         return saved_images  # List of saved image paths
-
-
-
-
-
-
-
-
-
-
 
 
 
     def load_images_into_widget(self):
         """Load the images from the folder into the list widget"""
-        for image_hash, image_path in self.saved_hashes.items():
+        for image_hash, meta in self.saved_hashes.items():
+            image_path = meta["path"]
             # Create a list item for each image
             image_name = os.path.basename(image_path)
             item = QListWidgetItem(image_name)
 
             # Create a thumbnail for each image
+            print(f"image_path type: {type(image_path)}, value: {image_path}")
             pixmap = QPixmap(image_path)
             if pixmap.isNull():
                 print(f"Failed to load image: {image_path}")
@@ -335,39 +361,69 @@ class MainWindow(QMainWindow):
 
 
     def export_results(self):
+        summary_path = "final_summary.xlsx"
 
-        if self.hwnd:
+        if not os.path.exists(summary_path):
+            QMessageBox.critical(self, "Error", "No data to export: 'final_summary.xlsx' file not found.")
+            return
 
-            # Read the summary CSV file into a DataFrame
-            df_summary = pd.read_csv("final_summary.csv")
+        df_summary_sheets = pd.read_excel(summary_path, sheet_name=None, engine='openpyxl')
 
-            # Open a file dialog to select the existing Excel file
-            root = tk.Tk()
-            root.withdraw()  # Hide the root window
-            file_path = filedialog.askopenfilename(title="Select an Excel file", filetypes=[("Excel files", "*.xlsx;*.xls")])
+        root = tk.Tk()
+        root.withdraw()
+        file_path = filedialog.askopenfilename(
+            title="Select an Excel file",
+            filetypes=[("Excel files", "*.xlsx;*.xls")]
+        )
 
-            if not file_path:
-                print("No file selected.")
-                return
+        if not file_path:
+            print("No file selected.")
+            return
 
-            # Extract the file name from current image path
-            match = re.search(r'[^/\\]+$', self.current_image_path)
+        try:
+            existing_sheets = pd.read_excel(file_path, sheet_name=None, engine='openpyxl')
+            updated_sheets = {}
 
-            if match:
-                # Get the matched file name for the sheet name
-                sheet_name = match.group(0)  # Extracted file name as the sheet name
+            for sheet_name, df_summary in df_summary_sheets.items():
+                # If sheet exists, merge and replace by colony_label
+                if sheet_name in existing_sheets:
+                    df_existing = existing_sheets[sheet_name]
 
-                try:
-                    # Try to open the existing Excel file to append a new sheet
-                    with ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
-                        df_summary.to_excel(writer, sheet_name=sheet_name, index=False)
-                    print(f"Summary saved to {file_path} in sheet '{sheet_name}'")
-                except FileNotFoundError:
-                    print(f"File not found: {file_path}")
-            else:
-                print("No image selected")
-        else:
-             return
+                    # Ensure both DataFrames have the same columns
+                    all_columns = sorted(set(df_existing.columns).union(df_summary.columns))
+                    df_existing = df_existing.reindex(columns=all_columns, fill_value=None)
+                    df_summary = df_summary.reindex(columns=all_columns, fill_value=None)
+
+                    # Set colony_label as index to allow direct replacement
+                    df_existing.set_index("colony_label", inplace=True, drop=False)
+                    df_summary.set_index("colony_label", inplace=True, drop=False)
+
+                    # Update or add rows from df_summary
+                    df_existing.update(df_summary)
+                    df_combined = pd.concat([df_existing, df_summary[~df_summary.index.isin(df_existing.index)]])
+                    df_combined = df_combined.reset_index(drop=True)
+
+                    updated_sheets[sheet_name] = df_combined
+                else:
+                    updated_sheets[sheet_name] = df_summary
+
+            # Preserve other sheets not touched by the summary
+            for sheet_name, df_existing in existing_sheets.items():
+                if sheet_name not in updated_sheets:
+                    updated_sheets[sheet_name] = df_existing
+
+            # Write everything back
+            with pd.ExcelWriter(file_path, engine='openpyxl', mode='w') as writer:
+                for sheet_name, df in updated_sheets.items():
+                    df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+            print(f"Summary merged and saved to {file_path} with all sheets updated.")
+
+        except FileNotFoundError:
+            print(f"File not found: {file_path}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 
 
 
@@ -426,7 +482,7 @@ class MainWindow(QMainWindow):
         """
         self.ij.py.run_macro(macro)
 
-
+        import os
 
     def delete_all_images(self):
         """Delete all images and their associated ROI and CSV data."""
@@ -457,9 +513,28 @@ class MainWindow(QMainWindow):
                             except Exception as e:
                                 raise Exception(f"Failed to delete {file_path}: {e}")
 
+                # Delete the final summary Excel file
+                final_summary_path = os.path.join(os.getcwd(), "final_summary.xlsx")
+                if os.path.exists(final_summary_path):
+                    try:
+                        os.remove(final_summary_path)
+                        print("Final summary Excel file deleted.")
+                    except Exception as e:
+                        raise Exception(f"Failed to delete final summary file: {e}")
+
                 QMessageBox.information(self, "Success", "All images and associated data have been deleted.")
 
                 self.image_uploader.saved_hashes = {}
+
+                # Delete metadata JSON file
+                metadata_path = os.path.join("metadata", "saved_hashes.json")
+                if os.path.exists(metadata_path):
+                    try:
+                        os.remove(metadata_path)
+                        print("Metadata JSON file deleted.")
+                    except Exception as e:
+                        raise Exception(f"Failed to delete metadata JSON file: {e}")
+
                 self.image_uploader.load_images_into_widget()
                 all_images = self.image_uploader.get_all_images()
                 self.display_thumbnails(all_images)
@@ -470,16 +545,20 @@ class MainWindow(QMainWindow):
 
                 QMessageBox.information(self, "Deleted", "Image and associated ROI (if any) deleted successfully.")
 
-
                 if self.hwnd:
                     print(self.hwnd)
                     for elem in self.hwnd:
-                            win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
+                        win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
                     self.hwnd = []
-
+                colony_label = ""
+                project_id = ""
+                self.ui.colonyIdInput.setText(colony_label)
+                self.ui.projectIdInput.setText(project_id)
 
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"An error occurred while deleting: {e}")
+
+
 
 
     def delete_image(self):
@@ -510,13 +589,36 @@ class MainWindow(QMainWindow):
                 else:
                     print("Associated ROI file not found.")
 
-                # Remove the deleted image from saved_hashes
-                if self.current_image_path in self.image_uploader.saved_hashes.values():
-                    del self.image_uploader.saved_hashes[next(key for key, value in self.image_uploader.saved_hashes.items() if value == self.current_image_path)]
-                    print(f"Removed {self.current_image_path} from saved_hashes.")
+                # Remove the deleted image from saved_hashes dictionary in memory
+                keys_to_remove = []
+                for key, value in self.image_uploader.saved_hashes.items():
+                    if value["path"] == self.current_image_path:
+                        keys_to_remove.append(key)
+                for key in keys_to_remove:
+                    del self.image_uploader.saved_hashes[key]
+                    print(f"Removed {self.current_image_path} and its metadata from saved_hashes.")
+
+                # Also remove the JSON metadata entry from the JSON file
+                metadata_path = os.path.join("metadata", "saved_hashes.json")
+                if os.path.exists(metadata_path):
+                    import json
+                    with open(metadata_path, "r") as f:
+                        metadata = json.load(f)
+
+                    # Remove keys matching current image path
+                    keys_to_remove_from_file = []
+                    for key, value in metadata.items():
+                        if value.get("path") == self.current_image_path:
+                            keys_to_remove_from_file.append(key)
+                    for key in keys_to_remove_from_file:
+                        metadata.pop(key, None)
+
+                    # Write updated metadata back to the JSON file
+                    with open(metadata_path, "w") as f:
+                        json.dump(metadata, f, indent=4)
+                    print(f"Removed metadata JSON entry for {self.current_image_path}")
 
                 # Refresh the thumbnail list (this also ensures the list widget updates)
-
                 self.image_uploader.load_images_into_widget()
                 all_images = self.image_uploader.get_all_images()
                 self.display_thumbnails(all_images)
@@ -529,8 +631,13 @@ class MainWindow(QMainWindow):
                 if self.hwnd:
                     print(self.hwnd)
                     for elem in self.hwnd:
-                            win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
+                        win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
                     self.hwnd = []
+
+                colony_label = ""
+                project_id = ""
+                self.ui.colonyIdInput.setText(colony_label)
+                self.ui.projectIdInput.setText(project_id)
 
                 QMessageBox.information(self, "Deleted", "Image and associated ROI (if any) deleted successfully.")
 
@@ -538,7 +645,9 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", f"An error occurred while deleting: {e}")
 
 
+
     def on_image_clicked(self, item):
+
 
         self.ij.py.run_macro("""
         run("Clear Results", "");
@@ -553,7 +662,6 @@ class MainWindow(QMainWindow):
                     win32gui.PostMessage(elem, win32con.WM_CLOSE, 0, 0)
             self.hwnd = []
 
-
         # Running the macro via ImageJ Python API
 
         # Running the macro via ImageJ Python API
@@ -564,6 +672,19 @@ class MainWindow(QMainWindow):
 
         # Display the image in the PyQt GUI
         self.display_image(image_path)
+
+        colony_label = ""
+        project_id = ""
+
+
+        for meta in self.image_uploader.saved_hashes.values():
+            if meta.get("path") == self.current_image_path:
+                colony_label = meta.get("colony_label", "")
+                project_id = meta.get("project_id", "")
+                break
+
+        self.ui.colonyIdInput.setText(colony_label)
+        self.ui.projectIdInput.setText(project_id)
 
 
     def display_image(self, image_path):
@@ -607,41 +728,121 @@ class MainWindow(QMainWindow):
             all_images = self.image_uploader.get_all_images()  # Get all images (including previously saved)
             self.display_thumbnails(all_images)
 
+            import os
+            import pandas as pd
+            from openpyxl import load_workbook, Workbook
+
     def save_results(self):
         if not hasattr(self, 'current_image_path') or not self.current_image_path:
-            print("No image selected.")
-            return
-        self.add_colonies();
+              print("No image selected.")
+              return
 
-        # Extract image filename without extension
+        self.add_colonies()  # Your function to prepare colonies
+
+          # --- Save ROI ---
         image_name = os.path.splitext(os.path.basename(self.current_image_path))[0]
         roi_filename = f"{image_name}_ROI.zip"
-
-        # Construct path to app_ROI folder (same level as app_images)
         app_dir = os.path.dirname(os.path.abspath(self.current_image_path))
-        base_dir = os.path.dirname(app_dir)  # assumes app_images is a subfolder
+        base_dir = os.path.dirname(app_dir)
         roi_dir = os.path.join(base_dir, "app_ROI")
-
-        # Create the ROI folder if it doesn't exist
         os.makedirs(roi_dir, exist_ok=True)
-
-        # Full path for ROI file
         file_path = os.path.join(roi_dir, roi_filename)
+        escaped_path = file_path.replace("\\", "\\\\")  # Escape for macro
 
-        # Escape backslashes for ImageJ macro
-        escaped_path = file_path.replace("\\", "\\\\")
-        macro = f'roiManager("Save", "{escaped_path}");'
-
-        # Run the macro
-        self.ij.py.run_macro(macro)
+        macro_roi = f'roiManager("Save", "{escaped_path}");'
+        self.ij.py.run_macro(macro_roi)
         print(f"ROI saved to {file_path}")
 
+        # Metadata extraction
+        project_id = "UNSET"
+        colony_label = "Unknown"
+        for meta in self.image_uploader.saved_hashes.values():
+            if meta.get("path") == self.current_image_path:
+                project_id = meta.get("project_id") or "UNSET"
+                colony_label = meta.get("colony_label") or "Unknown"
+                break
 
+        # Run macro to save Results window as CSV
+        os.makedirs("app_csv", exist_ok=True)
+        self.ij.py.run_macro("""
+            if (isOpen("Results")) {
+                saveAs("Results", "app_csv/summary_temp.csv");
+            }
+        """)
 
+        results_csv = "app_csv/summary_temp.csv"
 
+        # Check if CSV exists and read it
+        if not os.path.exists(results_csv):
+            print(f"{results_csv} not found. No results saved.")
+            return
 
+        try:
+            df = pd.read_csv(results_csv)
+        except Exception as e:
+            print(f"Failed to read CSV {results_csv}: {e}")
+            return
 
+        # Calculate summary stats assuming 'Area' column in Results
+        if df.empty or "Area" not in df.columns:
+            number_of_colonies = 0
+            average_size = 0.0
+            std_dev_size = 0.0
+        else:
+            number_of_colonies = len(df)
+            average_size = round(df["Area"].mean(), 3)
+            std_dev_size = round(df["Area"].std(ddof=1), 3) if number_of_colonies > 1 else 0.0
 
+        final_row = {
+            "project_id": project_id,
+            "colony_label": colony_label,
+            "image_file_name": os.path.basename(self.current_image_path),
+            "number_of_colonies": number_of_colonies,
+            "average_size": average_size,
+            "std_dev_size": std_dev_size
+        }
+
+        # Save to Excel (replace sheet data if sheet exists)
+        excel_path = "final_summary.xlsx"
+        sheet_name = project_id[:31]  # max sheet name length
+
+        if os.path.exists(excel_path):
+            book = load_workbook(excel_path)
+        else:
+            book = Workbook()
+            if 'Sheet' in book.sheetnames:
+                std = book['Sheet']
+                book.remove(std)
+
+        if sheet_name in book.sheetnames:
+            ws = book[sheet_name]
+
+            # Read existing sheet into DataFrame
+            data = ws.values
+            columns = next(data)  # header row
+            df_existing = pd.DataFrame(data, columns=columns)
+
+            # Check if colony_label already exists in that sheet
+            if colony_label in df_existing['colony_label'].values:
+                # Update the existing row for this colony_label
+                df_existing.loc[df_existing['colony_label'] == colony_label, :] = list(final_row.values())
+            else:
+                # Append new row
+                df_existing = pd.concat([df_existing, pd.DataFrame([final_row])], ignore_index=True)
+
+            # Clear the worksheet and rewrite with updated df
+            ws.delete_rows(1, ws.max_row)
+            ws.append(list(df_existing.columns))
+            for row in df_existing.itertuples(index=False):
+                ws.append(row)
+
+        else:
+            ws = book.create_sheet(title=sheet_name)
+            ws.append(list(final_row.keys()))  # Write header
+            ws.append(list(final_row.values()))
+
+        book.save(excel_path)
+        print(f"Results saved to Excel sheet '{sheet_name}' in {excel_path}")
 
 
 
@@ -826,8 +1027,6 @@ class MainWindow(QMainWindow):
     def preprocess_image(self, arr):
 
 
-
-
         if arr.shape[2] == 4:
             arr = arr[:, :, :3]
 
@@ -892,6 +1091,46 @@ class MainWindow(QMainWindow):
         if self.pixmap is None:
             QMessageBox.information(None, "Error", "No image loaded")
             return
+
+        project_id = self.ui.projectIdInput.text().strip()
+        colony_label = self.ui.colonyIdInput.text().strip()
+
+        if not project_id or not colony_label:
+            QMessageBox.information(
+                self,
+                "Invalid Project ID or Colony Label",
+                "Enter a unique Project ID and Colony Label."
+            )
+            return
+
+
+        # Check for duplicate colony label within the same project_id
+        for meta in self.image_uploader.saved_hashes.values():
+            # meta is a dict with keys "path", "project_id", "colony_label"
+            if meta["project_id"] == project_id and meta["colony_label"] == colony_label and self.current_image_path != meta["path"]:
+                existing_path = meta["path"]
+                QMessageBox.information(
+                    self,
+                    "Duplicate Colony Label",
+                    f"Colony Label '{colony_label}' already exists for Project ID '{project_id}'.\n"
+                    f"Existing image path:\n{existing_path}"
+                )
+                return  # Stop processing due to duplicate
+
+
+
+
+        image_hash = self.image_uploader._get_image_hash(self.current_image_path)
+
+        self.image_uploader.saved_hashes[image_hash]["project_id"] = project_id
+        self.image_uploader.saved_hashes[image_hash]["colony_label"] = colony_label
+
+
+        try:
+            with open("metadata/saved_hashes.json", "w") as f:
+                json.dump(self.image_uploader.saved_hashes, f, indent=4)
+        except Exception as e:
+            QMessageBox.warning(self, "Save Failed", f"Could not save metadata: {e}")
 
         # Convert QPixmap to QImage
         qimage = self.pixmap.toImage()
@@ -1035,63 +1274,63 @@ class MainWindow(QMainWindow):
         self.ij.py.run_macro("run('Watershed');",)
         self.ij.py.run_macro("run('Analyze Particles...', 'size=70-50000 circularity=0.70-1.00 display exclude summarize overlay add');",)
 
-        project_id = self.ui.projectIdInput.text().strip()
-        colony_label = self.ui.colonyIdInput.text().strip()
+        # project_id = self.ui.projectIdInput.text().strip()
+        # colony_label = self.ui.colonyIdInput.text().strip()
 
-        if not project_id:
-            project_id = "UNSET"
-        if not colony_label:
-            colony_label = "Unknown"
-
-
-        self.ij.py.run_macro("""
-            // Save Summary table if open
-            if (isOpen("Summary")) {
-                selectWindow("Summary");
-                saveAs("Results", "summary_temp.csv");
-            }
-            // Save Results table if open
-            if (isOpen("Results")) {
-                selectWindow("Results");
-                saveAs("Results", "results_table.csv");
-            }
-        """)
-        df_results = pd.read_csv("results_table.csv")
-        sizes = df_results["Area"]
-        std_dev_size = round(df_results["Area"].std(ddof=1), 3)
+        # if not project_id:
+        #     project_id = "UNSET"
+        # if not colony_label:
+        #     colony_label = "Unknown"
 
 
-        # Load the CSV into pandas
-        df_summary = pd.read_csv("summary_temp.csv")
-        # copy summary results from csv to excel
+        # self.ij.py.run_macro("""
+        #     // Save Summary table if open
+        #     if (isOpen("Summary")) {
+        #         selectWindow("Summary");
+        #         saveAs("Results", "summary_temp.csv");
+        #     }
+        #     // Save Results table if open
+        #     if (isOpen("Results")) {
+        #         selectWindow("Results");
+        #         saveAs("Results", "results_table.csv");
+        #     }
+        # """)
+        # df_results = pd.read_csv("results_table.csv")
+        # sizes = df_results["Area"]
+        # std_dev_size = round(df_results["Area"].std(ddof=1), 3)
 
 
-        image_file_name = os.path.basename(self.current_image_path)
+        # # Load the CSV into pandas
+        # df_summary = pd.read_csv("summary_temp.csv")
+        # # copy summary results from csv to excel
 
 
-        try:
-            number_of_colonies = int(df_summary.at[0, 'Count'])
-            average_size = float(df_summary.at[0, 'Average Size'])
-        except KeyError:
-            print("Expected columns missing.")
-            return
+        # image_file_name = os.path.basename(self.current_image_path)
 
 
-        final_row = pd.DataFrame([{
-            "project_id": project_id,
-            "image_file_name": image_file_name,
-            "colony_label": colony_label,
-            "number_of_colonies": number_of_colonies,
-            "average_size": average_size,
-            "std_dev_size": std_dev_size
-        }])
+        # try:
+        #     number_of_colonies = int(df_summary.at[0, 'Count'])
+        #     average_size = float(df_summary.at[0, 'Average Size'])
+        # except KeyError:
+        #     print("Expected columns missing.")
+        #     return
 
-        # Save to final_summary.csv (append if exists)
-        csv_path = "final_summary.csv"
-        if os.path.exists(csv_path):
-            final_row.to_csv(csv_path, mode='a', header=False, index=False)
-        else:
-            final_row.to_csv(csv_path, index=False)
+
+        # final_row = pd.DataFrame([{
+        #     "project_id": project_id,
+        #     "image_file_name": image_file_name,
+        #     "colony_label": colony_label,
+        #     "number_of_colonies": number_of_colonies,
+        #     "average_size": average_size,
+        #     "std_dev_size": std_dev_size
+        # }])
+
+        # # Save to final_summary.csv (append if exists)
+        # csv_path = "final_summary.csv"
+        # if os.path.exists(csv_path):
+        #     final_row.to_csv(csv_path, mode='a', header=False, index=False)
+        # else:
+        #     final_row.to_csv(csv_path, index=False)
 
         self.ij.py.run_macro("setTool('freehand');",)
         self.ij.ui().show(imp)
