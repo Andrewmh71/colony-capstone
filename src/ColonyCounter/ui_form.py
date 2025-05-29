@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'form.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.1
+## Created by: Qt User Interface Compiler version 6.8.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -83,7 +83,7 @@ class Ui_MainWindow(object):
         self.saveImageButton.setText(QCoreApplication.translate("MainWindow", u"Save Progress", None))
         self.loadImageButton.setText(QCoreApplication.translate("MainWindow", u"Load Image From Save File", None))
         self.addFolderButton.setText(QCoreApplication.translate("MainWindow", u"Add Images to Workspace", None))
-        self.DeleteButton.setText(QCoreApplication.translate("MainWindow", u"Delete 1", None))
+        self.DeleteButton.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
         self.excelButton.setText(QCoreApplication.translate("MainWindow", u"Export To Excel", None))
         self.deleteColonies.setText(QCoreApplication.translate("MainWindow", u"Delete Selection", None))
         self.deleteAll.setText(QCoreApplication.translate("MainWindow", u"Clear All", None))

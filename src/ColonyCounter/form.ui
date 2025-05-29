@@ -122,7 +122,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Delete 1</string>
+     <string>Delete</string>
     </property>
    </widget>
    <widget class="QWidget" name="centralwidget_2" native="true">
