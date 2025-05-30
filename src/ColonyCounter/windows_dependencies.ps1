@@ -1,4 +1,4 @@
-$RequiredJavaHome = "C:\Program Files\Microsoft\jdk-11.0.18.9-hotspot"
+$RequiredJavaHome = "C:\Program Files\Microsoft\jdk-11.0.27-hotspot"
 $RequiredJavaPath = "$RequiredJavaHome\bin"
 $RequiredPythonVersion = "3.9"
 $RequiredPythonInstallDir = "C:\Program Files\Python39"
@@ -212,11 +212,11 @@ if (-not (Check-Maven)) {
 } else {
     Add-MavenToPath
 }
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
 
-if (Check-Python39) {
-    Install-PythonPackages
-} else {
-    Write-Warning "Python 3.9 not found. Skipping Python package installation."
+if ((Check-Python39)){
+Install-PythonPackages
+
 }
 
 Write-Host "`n All done. Please restart your PowerShell session or system for changes to take effect."
