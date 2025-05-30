@@ -26,8 +26,7 @@ To verify, reopen PowerShell and type:
 
 ### 2. Clone the Repository
 
-- Go to the GitHub page for this project.
-- Click the green "Code" button.
+- On this page, click the green "Code" button in the top right.
 - Copy the HTTPS link.
 
 In PowerShell, type:
@@ -45,16 +44,16 @@ Clone the repository to your desktop by typing:
 
 **Important:** When you run PowerShell as Administrator, it starts in the `C:\Windows\System32` directory.  
 To get back to your user folder, type:
+> **Note:** Replace `YOUR-NAME-HERE` with your actual Windows user account name.
 
     cd ..\..\Users\YOUR-NAME-HERE\Desktop\colony-capstone\src\ColonyCounter
 
-> **Note:** Replace `YOUR-NAME-HERE` with your actual Windows user account name.
 
 Then, set the execution policy by typing:
 
     Set-ExecutionPolicy Unrestricted
 
-Press:
+Enter:
 
     A
 
@@ -67,17 +66,17 @@ This will:
 - Set environment variables
 - Install required Python packages
 
-**Note:** This step may take several minutes.
+**Note:** This step may take several minutes, don't close powershell until the window until the prompt says "All done".
 
 ### 4. Launch the Application
 
 - Close PowerShell.
 - Reopen PowerShell **as Administrator** again.
 - Navigate back to the same folder (repeat the steps above if needed):
+> **Reminder:** Replace `YOUR-NAME-HERE` with your actual Windows user account name.
 
     cd ..\..\Users\YOUR-NAME-HERE\Desktop\colony-capstone\src\ColonyCounter
 
-> **Reminder:** Replace `YOUR-NAME-HERE` with your actual Windows user account name.
 
 Start the app:
 
