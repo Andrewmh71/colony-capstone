@@ -1,15 +1,14 @@
-Access and Usage
+# Access and Usage
 
-# Requirements (Included in Installation Script)
+## Requirements (Included in Installation Script)
 
 - Python 3 (tested with versions 3.9.0 through 3.13)
 - OpenJDK 8 or 11
 - Maven (must be available on the system PATH)
 
+## Installation Instructions (Windows Only)
 
-# Installation Instructions (Windows Only)
-
-## 1. Check if Git is Installed
+### 1. Check if Git is Installed
 
 Open PowerShell (you can search for it) and type:
 
@@ -17,26 +16,29 @@ Open PowerShell (you can search for it) and type:
 
 If you see an error like "git is not recognized", download and install Git from:
 
-    https://git-scm.com/downloads/win
+    https://git-scm.com/downloads/win  
+    Under "Download for Windows," click "Click here to download."  
+    Once it installs, open it and click "Next" during the dialog.
 
-## 2. Clone the Repository
+To verify, reopen PowerShell and type:
+
+    git --version
+
+### 2. Clone the Repository
 
 - Go to the GitHub page for this project.
 - Click the green "Code" button.
 - Copy the HTTPS link.
 
-In PowerShell, navigate to the folder where you want to clone the project:
+In PowerShell, type:
 
-    pwd                <- shows your current location
-    cd [folder_name]   <- enter a folder
-    cd ..              <- go up one folder
-    ls                 <- list contents of current folder
+    cd Desktop
 
-Clone the repository by typing:
+Clone the repository to your desktop by typing:
 
     git clone https://github.com/Andrewmh71/colony-capstone.git
 
-## 3. Run the Setup Script
+### 3. Run the Setup Script
 
 - Close the current PowerShell window.
 - Reopen PowerShell **as Administrator** (search "PowerShell", right-click it, and select "Run as Administrator").
@@ -44,19 +46,21 @@ Clone the repository by typing:
 **Important:** When you run PowerShell as Administrator, it starts in the `C:\Windows\System32` directory.  
 To get back to your user folder, type:
 
-    cd ../..
+    cd ..\..\Users\YOUR-NAME-HERE\Desktop\colony-capstone\src\ColonyCounter
 
-Then type:
+> **Note:** Replace `YOUR-NAME-HERE` with your actual Windows user account name.
 
-    cd Users\YOUR-NAME
+Then, set the execution policy by typing:
 
-Replace `YOUR-NAME` with your actual Windows username. From here, navigate to the folder where you cloned the project:
+    Set-ExecutionPolicy Unrestricted
 
-    Example: cd Desktop\colony-capstone\src\ColonyCounter
+Press:
 
-Run the setup script:
+    A
 
-    ./windows_dependencies.ps1
+Then, run the setup script:
+
+    .\windows_dependencies.ps1
 
 This will:
 - Install Java, Python, and Maven
@@ -65,21 +69,22 @@ This will:
 
 **Note:** This step may take several minutes.
 
-## 4. Launch the Application
+### 4. Launch the Application
 
 - Close PowerShell.
 - Reopen PowerShell **as Administrator** again.
 - Navigate back to the same folder (repeat the steps above if needed):
 
-    cd ../..
-    cd Users\YOUR-NAME
-    cd Desktop\colony-capstone\src\ColonyCounter
+    cd ..\..\Users\YOUR-NAME-HERE\Desktop\colony-capstone\src\ColonyCounter
+
+> **Reminder:** Replace `YOUR-NAME-HERE` with your actual Windows user account name.
 
 Start the app:
 
     python mainwindow.py
 
 It may take up to a minute to launch the first time.
+
 
 
 Low-Cost Bacterial Colony Processing System
