@@ -1,8 +1,7 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QMessageBox, QGraphicsEllipseItem, QGraphicsItem, QGraphicsRectItem, QSlider, QInputDialog,  QVBoxLayout,  QSizePolicy
-from PySide6.QtGui import QPixmap, QImage, QPen, QMouseEvent, QPainter, QRegion, QPainterPath, QIcon, QWindow
-from PySide6.QtGui import QShortcut, QKeySequence
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QMessageBox,  QVBoxLayout,  QSizePolicy
+from PySide6.QtGui import QPixmap, QImage, QIcon, QWindow
 import time
-from PySide6.QtCore import Qt, QRectF, QSize
+from PySide6.QtCore import Qt, QSize
 from ui_form import Ui_MainWindow
 from customGraphicsView import ImageGraphicsView
 import sys
@@ -11,31 +10,30 @@ import numpy as np
 import imagej
 import scyjava as sj
 import os
-from sklearn.cluster import DBSCAN
-import imageio
+
+
 from PIL import Image
 import pillow_heif
-from scipy import ndimage as ndi
-from skimage.feature import peak_local_max
-from skimage.segmentation import watershed
-from skimage.morphology import label
+
+
+
 # from jnius import autoclass
 import scyjava
-from scyjava import jimport
-import matplotlib.pyplot as plt
+
+
 import shutil
 import hashlib
-from PySide6.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
-import psutil
+from PySide6.QtWidgets import  QListWidget, QListWidgetItem, QWidget
+
 import win32gui
-import time
+
 import win32con
 import pandas as pd
-from pandas import ExcelWriter
-import openpyxl
+
+
 import tkinter as tk
 from tkinter import filedialog
-import re
+
 import json
 from openpyxl import Workbook, load_workbook
 
@@ -482,7 +480,7 @@ class MainWindow(QMainWindow):
         """
         self.ij.py.run_macro(macro)
 
-        import os
+
 
     def delete_all_images(self):
         """Delete all images and their associated ROI and CSV data."""
@@ -728,9 +726,7 @@ class MainWindow(QMainWindow):
             all_images = self.image_uploader.get_all_images()  # Get all images (including previously saved)
             self.display_thumbnails(all_images)
 
-            import os
-            import pandas as pd
-            from openpyxl import load_workbook, Workbook
+
 
     def save_results(self):
         if not hasattr(self, 'current_image_path') or not self.current_image_path:
@@ -1201,7 +1197,7 @@ class MainWindow(QMainWindow):
                 # If we found a most centered circle, crop the image inside the circle
                 if most_centered_circle:
                     x, y, r = most_centered_circle
-                    output_image = arr.copy()
+
 
                     # Step 5: Create a mask for the circle
                     mask = np.zeros_like(arr)

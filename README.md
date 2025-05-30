@@ -1,3 +1,89 @@
+Access and Usage
+
+# Requirements (Included in Installation Script)
+
+- Python 3 (tested with versions 3.9.0 through 3.13)
+- OpenJDK 8 or 11
+- Maven (must be available on the system PATH)
+
+# Installation Instructions (Windows Only)
+
+1. Check if Git is Installed
+
+   Open PowerShell and type:
+
+       git --version
+
+   If you see an error like "git is not recognized", download and install Git from:
+
+       https://git-scm.com/downloads/win
+
+2. Clone the Repository
+
+   - Go to the GitHub page for this project.
+   - Click the green "Code" button.
+   - Copy the HTTPS link.
+
+   In PowerShell, navigate to the folder where you want to clone the project:
+
+       pwd                <- shows current path
+       cd [folder_name]   <- go into a folder
+       cd ..              <- go up one folder
+       ls                 <- list contents of current folder
+
+   Clone the repository by typing:
+
+       git clone https://github.com/YOUR-USERNAME/colony-capstone.git
+
+3. Run the Setup Script
+
+   - Close the current PowerShell window.
+   - Reopen PowerShell **as Administrator** (search "PowerShell", right-click, "Run as Administrator").
+
+   Navigate to the script folder:
+
+       cd "C:\Users\YOUR-NAME\Desktop\colony-capstone\src\ColonyCounter"
+
+   Run the setup script:
+
+       ./windows_dependencies.ps1
+
+   This will:
+   - Install Java, Python, and Maven
+   - Set environment variables
+   - Install Python dependencies
+
+   Note: This may take several minutes.
+
+4. Launch the Application
+
+   - Close PowerShell.
+   - Reopen PowerShell **as Administrator** again.
+   - Navigate back to the same directory:
+
+       cd "C:\Users\YOUR-NAME\Desktop\colony-capstone\src\ColonyCounter"
+
+   Start the app:
+
+       python mainwindow.py
+
+   It may take up to a minute to launch the first time. Be patient.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Low-Cost Bacterial Colony Processing System
 
 An accessible, open-source alternative to expensive commercial colony counting tools.
@@ -111,34 +197,7 @@ Development Challenges and Solutions
             ImageJ is now embedded directly into the PyQt interface.
             This improves workflow consistency and user experience.
 
-Access and Usage
 
-Requirements
-
-    Python 3 (tested with versions 3.9.0 through 3.13)
-    OpenJDK 8 or 11
-    Maven (must be available on the system path)
-
-Installation Instructions
-
-    1. Clone the repository
-    2. Install dependencies
-
-    If on Unix-based system:
-        Run the installation script:
-            ./dependencies.sh
-
-    If on Windows, manually install the following packages using pip:
-        pyimagej
-        PySide6
-        opencv-python
-        imagej
-        scikit-learn
-        scikit-image
-        pillow-heif
-        matplotlib
-        pywin32
-        openpyxl
 
 The Graphical User Interace
 
