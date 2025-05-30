@@ -1,4 +1,4 @@
-$RequiredJavaHome = "C:\Program Files\Microsoft\jdk-11.0.27-hotspot"
+$RequiredJavaHome = "C:\Program Files\Microsoft\jdk-11.0.27.6-hotspot"
 $RequiredJavaPath = "$RequiredJavaHome\bin"
 $RequiredPythonVersion = "3.9"
 $RequiredPythonInstallDir = "C:\Program Files\Python39"
