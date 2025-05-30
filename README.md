@@ -10,7 +10,7 @@
 
 ### 1. Check if Git is Installed
 
-Open PowerShell (you can search for it) and type:
+Open PowerShell (you can search for it on your system) and enter:
 
     git --version
 
@@ -20,16 +20,18 @@ If you see an error like "git is not recognized", download and install Git from:
     Under "Download for Windows," click "Click here to download."  
     Once it installs, open it and click "Next" during the dialog.
 
-To verify, reopen PowerShell and type:
+To verify, close PowerShell, reopen it, and then type:
 
     git --version
+
+If you see the version, you are good to go.
 
 ### 2. Clone the Repository
 
 - On this page, click the green "Code" button in the top right.
 - Copy the HTTPS link.
 
-In PowerShell, type:
+In PowerShell, enter:
 
     cd Desktop
 
