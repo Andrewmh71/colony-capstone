@@ -6,82 +6,80 @@ Access and Usage
 - OpenJDK 8 or 11
 - Maven (must be available on the system PATH)
 
+
 # Installation Instructions (Windows Only)
 
-1. Check if Git is Installed
+## 1. Check if Git is Installed
 
-   Open PowerShell and type:
+Open PowerShell (you can search for it) and type:
 
-       git --version
+    git --version
 
-   If you see an error like "git is not recognized", download and install Git from:
+If you see an error like "git is not recognized", download and install Git from:
 
-       https://git-scm.com/downloads/win
+    https://git-scm.com/downloads/win
 
-2. Clone the Repository
+## 2. Clone the Repository
 
-   - Go to the GitHub page for this project.
-   - Click the green "Code" button.
-   - Copy the HTTPS link.
+- Go to the GitHub page for this project.
+- Click the green "Code" button.
+- Copy the HTTPS link.
 
-   In PowerShell, navigate to the folder where you want to clone the project:
+In PowerShell, navigate to the folder where you want to clone the project:
 
-       pwd                <- shows current path
-       cd [folder_name]   <- go into a folder
-       cd ..              <- go up one folder
-       ls                 <- list contents of current folder
+    pwd                <- shows your current location
+    cd [folder_name]   <- enter a folder
+    cd ..              <- go up one folder
+    ls                 <- list contents of current folder
 
-   Clone the repository by typing:
+Clone the repository by typing:
 
-       git clone https://github.com/YOUR-USERNAME/colony-capstone.git
+    git clone https://github.com/Andrewmh71/colony-capstone.git
 
-3. Run the Setup Script
+## 3. Run the Setup Script
 
-   - Close the current PowerShell window.
-   - Reopen PowerShell **as Administrator** (search "PowerShell", right-click, "Run as Administrator").
+- Close the current PowerShell window.
+- Reopen PowerShell **as Administrator** (search "PowerShell", right-click it, and select "Run as Administrator").
 
-   Navigate to the script folder:
+**Important:** When you run PowerShell as Administrator, it starts in the `C:\Windows\System32` directory.  
+To get back to your user folder, type:
 
-       cd "C:\Users\YOUR-NAME\Desktop\colony-capstone\src\ColonyCounter"
+    cd ../..
 
-   Run the setup script:
+Then type:
 
-       ./windows_dependencies.ps1
+    cd Users\YOUR-NAME
 
-   This will:
-   - Install Java, Python, and Maven
-   - Set environment variables
-   - Install Python dependencies
+Replace `YOUR-NAME` with your actual Windows username. From here, navigate to the folder where you cloned the project:
 
-   Note: This may take several minutes.
+    Example: cd Desktop\colony-capstone\src\ColonyCounter
 
-4. Launch the Application
+Run the setup script:
 
-   - Close PowerShell.
-   - Reopen PowerShell **as Administrator** again.
-   - Navigate back to the same directory:
+    ./windows_dependencies.ps1
 
-       cd "C:\Users\YOUR-NAME\Desktop\colony-capstone\src\ColonyCounter"
+This will:
+- Install Java, Python, and Maven
+- Set environment variables
+- Install required Python packages
 
-   Start the app:
+**Note:** This step may take several minutes.
 
-       python mainwindow.py
+## 4. Launch the Application
 
-   It may take up to a minute to launch the first time. Be patient.
+- Close PowerShell.
+- Reopen PowerShell **as Administrator** again.
+- Navigate back to the same folder (repeat the steps above if needed):
 
+    cd ../..
+    cd Users\YOUR-NAME
+    cd Desktop\colony-capstone\src\ColonyCounter
 
+Start the app:
 
+    python mainwindow.py
 
-
-
-
-
-
-
-
-
-
-
+It may take up to a minute to launch the first time.
 
 
 Low-Cost Bacterial Colony Processing System
