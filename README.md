@@ -72,7 +72,7 @@ This will:
 
 - Close PowerShell.
 - Reopen PowerShell **as Administrator** again.
-- Navigate back to the same folder (repeat the steps above if needed):
+- Navigate back to the same folder:
 > **Reminder:** Replace `YOUR-NAME-HERE` with your actual Windows user account name.
 
     cd ..\..\Users\YOUR-NAME-HERE\Desktop\colony-capstone\src\ColonyCounter
