@@ -66,7 +66,7 @@ This will:
 - Set environment variables
 - Install required Python packages
 
-**Note:** This step may take several minutes, don't close powershell until the window until the prompt says "All done".
+**Note:** This step may take several minutes, don't close powershell until the prompt says "All done".
 
 ### 4. Launch the Application
 
