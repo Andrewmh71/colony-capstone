@@ -86,8 +86,7 @@ Start the app:
 It may take up to a minute to launch the first time.
 
 
-
-###Low-Cost Bacterial Colony Processing System
+### Low-Cost Bacterial Colony Processing System
 
 An accessible, open-source alternative to expensive commercial colony counting tools.
 
